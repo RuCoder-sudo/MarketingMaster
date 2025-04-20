@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Логи - Мониторинг упоминаний в соцсетях{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>
+            <i class="fas fa-clipboard-list me-2"></i>
+            Логи системы
+        </h1>
+        <p class="lead">Просмотр, экспорт и управление логами</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-cogs me-2"></i>
+                    Управление логами
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p>
+                            <i class="fas fa-info-circle me-2"></i>
+                            Текущих логов: <span class="badge bg-info">{{ logs.total }}</span>
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <form method="post" action="{{ url_for('export_logs') }}" class="d-inline">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-download me-2"></i>
+                                Экспорт логов в CSV
+                            </button>
+                        </form>
+                        
+                        <form method="post" action="{{ url_for('clear_logs') }}" class="d-inline">
+                            <button type="submit" class="btn btn-danger" 
+                                   onclick="return confirm('Вы уверены, что хотите очистить все логи?');">
+                                <i class="fas fa-trash me-2"></i>
+                                Очистить логи
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Журнал событий
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if logs.items %}
+                    <div class="table-responsive">
+                        <table class="table table-hover datatable">
+                            <thead>
+                                <tr>
+                                    <th>Время</th>
+                                    <th>Уровень</th>
+                                    <th>Сообщение</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in logs.items %}
+                                    <tr class="log-entry {{ log.level.lower() }}">
+                                        <td width="180">{{ log.timestamp.strftime('%d.%m.%Y %H:%M:%S') }}</td>
+                                        <td width="100">
+                                            {% if log.level == 'INFO' %}
+                                                <span class="badge bg-info">INFO</span>
+                                            {% elif log.level == 'WARNING' %}
+                                                <span class="badge bg-warning">WARNING</span>
+                                            {% elif log.level == 'ERROR' %}
+                                                <span class="badge bg-danger">ERROR</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ log.level }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ log.message }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center mt-4">
+                            {% if logs.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('logs', page=logs.prev_num) }}">
+                                        <i class="fas fa-chevron-left"></i> Предыдущая
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fas fa-chevron-left"></i> Предыдущая</span>
+                                </li>
+                            {% endif %}
+                            
+                            {% for page_num in logs.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                                {% if page_num %}
+                                    {% if page_num == logs.page %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ page_num }}</span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('logs', page=page_num) }}">{{ page_num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if logs.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('logs', page=logs.next_num) }}">
+                                        Следующая <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">Следующая <i class="fas fa-chevron-right"></i></span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Логи отсутствуют.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

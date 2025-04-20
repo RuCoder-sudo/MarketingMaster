@@ -1,0 +1,138 @@
+/* Custom styles for Social Media Monitoring application */
+
+/* Highlight colors for found mentions */
+.highlight-yellow {
+    background-color: #ffff00;
+}
+
+.highlight-green {
+    background-color: #90EE90;
+}
+
+.highlight-blue {
+    background-color: #ADD8E6;
+}
+
+.highlight-pink {
+    background-color: #FFC0CB;
+}
+
+.highlight-orange {
+    background-color: #FFD580;
+}
+
+/* Social network badges */
+.badge-vk {
+    background-color: #4C75A3;
+    color: white;
+}
+
+.badge-ok {
+    background-color: #EE8208;
+    color: white;
+}
+
+/* Card styling for mentions */
+.mention-card {
+    transition: transform 0.2s ease;
+    border-left: 4px solid #6c757d;
+}
+
+.mention-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mention-card.vk {
+    border-left-color: #4C75A3;
+}
+
+.mention-card.ok {
+    border-left-color: #EE8208;
+}
+
+/* Sidebar styles */
+.sidebar {
+    position: sticky;
+    top: 20px;
+}
+
+/* Improve keyword list styling */
+.keyword-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.keyword-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.keyword-item:hover {
+    background-color: var(--bs-gray-200);
+}
+
+/* Project card styles */
+.project-card {
+    transition: transform 0.2s ease;
+}
+
+.project-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.project-card.active {
+    border-color: var(--bs-primary);
+    border-width: 2px;
+}
+
+/* Log entry styling */
+.log-entry {
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+.log-entry.info {
+    border-left: 3px solid var(--bs-info);
+}
+
+.log-entry.warning {
+    border-left: 3px solid var(--bs-warning);
+}
+
+.log-entry.error {
+    border-left: 3px solid var(--bs-danger);
+}
+
+/* Search form styling */
+.search-controls {
+    position: sticky;
+    top: 20px;
+    z-index: 100;
+    background-color: var(--bs-body-bg);
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid var(--bs-border-color);
+}
+
+/* Loading spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 0.2em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spinner-border .75s linear infinite;
+}
+
+@keyframes spinner-border {
+    to { transform: rotate(360deg); }
+}

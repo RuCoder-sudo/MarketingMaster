@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Настройки - Мониторинг упоминаний в соцсетях{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>
+            <i class="fas fa-cog me-2"></i>
+            Настройки
+        </h1>
+        <p class="lead">Настройте API токены и сообщества для мониторинга</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fab fa-vk me-2"></i>
+                    ВКонтакте API
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('settings') }}">
+                    <input type="hidden" name="action" value="save_tokens">
+                    <div class="mb-3">
+                        <label for="vk_token" class="form-label">Токен API ВКонтакте</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="vk_token" name="vk_token" 
+                                   value="{{ settings.vk_token if settings else '' }}">
+                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="vk_token">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="form-text text-muted">
+                            Получите токен в разделе <a href="https://vk.com/dev/access_token" target="_blank">Токены доступа</a> ВКонтакте API.
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">Сохранить токен</button>
+                    </div>
+                </form>
+                
+                {% if settings and settings.vk_token %}
+                    <hr>
+                    <h6>Добавление сообщества ВКонтакте</h6>
+                    <form method="post" action="{{ url_for('settings') }}" class="mt-3">
+                        <input type="hidden" name="action" value="add_community">
+                        <input type="hidden" name="social_network" value="vk">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="ID сообщества" name="community_id" required>
+                            <button class="btn btn-outline-primary" type="submit">Добавить</button>
+                        </div>
+                        <div class="form-text text-muted">
+                            Введите числовой ID сообщества ВКонтакте. 
+                            Для группы это обычно отрицательное число, например: -123456789.
+                        </div>
+                    </form>
+                    
+                    <div class="mt-4">
+                        <h6>Добавленные сообщества ВКонтакте:</h6>
+                        {% if vk_communities %}
+                            <div class="list-group">
+                                {% for community in vk_communities %}
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>{{ community }}</span>
+                                        <form method="post" action="{{ url_for('settings') }}" style="display: inline;">
+                                            <input type="hidden" name="action" value="remove_community">
+                                            <input type="hidden" name="social_network" value="vk">
+                                            <input type="hidden" name="community_id" value="{{ community }}">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-secondary">
+                                Нет добавленных сообществ ВКонтакте
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fab fa-odnoklassniki me-2"></i>
+                    Одноклассники API
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('settings') }}">
+                    <input type="hidden" name="action" value="save_tokens">
+                    <div class="mb-3">
+                        <label for="ok_token" class="form-label">Токен доступа Одноклассники</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="ok_token" name="ok_token" 
+                                   value="{{ settings.ok_token if settings else '' }}">
+                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="ok_token">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="ok_public_key" class="form-label">Публичный ключ приложения</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="ok_public_key" name="ok_public_key" 
+                                   value="{{ settings.ok_public_key if settings else '' }}">
+                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="ok_public_key">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="ok_private_key" class="form-label">Секретный ключ приложения</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="ok_private_key" name="ok_private_key" 
+                                   value="{{ settings.ok_private_key if settings else '' }}">
+                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="ok_private_key">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="form-text text-muted">
+                            Получите ключи в разделе <a href="https://ok.ru/dk?st.cmd=appEditBasic" target="_blank">Мои приложения</a> на сайте Одноклассники.
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-warning">Сохранить токены</button>
+                    </div>
+                </form>
+                
+                {% if settings and settings.ok_token and settings.ok_public_key and settings.ok_private_key %}
+                    <hr>
+                    <h6>Добавление сообщества Одноклассники</h6>
+                    <form method="post" action="{{ url_for('settings') }}" class="mt-3">
+                        <input type="hidden" name="action" value="add_community">
+                        <input type="hidden" name="social_network" value="ok">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="ID сообщества" name="community_id" required>
+                            <button class="btn btn-outline-warning" type="submit">Добавить</button>
+                        </div>
+                        <div class="form-text text-muted">
+                            Введите числовой ID группы Одноклассники.
+                        </div>
+                    </form>
+                    
+                    <div class="mt-4">
+                        <h6>Добавленные сообщества Одноклассники:</h6>
+                        {% if ok_communities %}
+                            <div class="list-group">
+                                {% for community in ok_communities %}
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>{{ community }}</span>
+                                        <form method="post" action="{{ url_for('settings') }}" style="display: inline;">
+                                            <input type="hidden" name="action" value="remove_community">
+                                            <input type="hidden" name="social_network" value="ok">
+                                            <input type="hidden" name="community_id" value="{{ community }}">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-secondary">
+                                Нет добавленных сообществ Одноклассники
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header bg-info">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Справка по API
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="apiHelpTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="vk-help-tab" data-bs-toggle="tab" data-bs-target="#vk-help" type="button" role="tab">ВКонтакте</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="ok-help-tab" data-bs-toggle="tab" data-bs-target="#ok-help" type="button" role="tab">Одноклассники</button>
+                    </li>
+                </ul>
+                <div class="tab-content p-3" id="apiHelpTabsContent">
+                    <div class="tab-pane fade show active" id="vk-help" role="tabpanel">
+                        <h6>Как получить токен ВКонтакте:</h6>
+                        <ol>
+                            <li>Создайте приложение на <a href="https://vk.com/dev/standalone" target="_blank">странице разработчика</a></li>
+                            <li>Получите токен с правами доступа к стене (wall) и группам (groups)</li>
+                            <li>Скопируйте токен в поле настроек выше</li>
+                        </ol>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Токен ВКонтакте имеет ограниченный срок действия. При необходимости обновите его.
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="ok-help" role="tabpanel">
+                        <h6>Как получить токены Одноклассники:</h6>
+                        <ol>
+                            <li>Создайте приложение на сайте <a href="https://ok.ru/dk?st.cmd=appEditBasic" target="_blank">Одноклассники</a></li>
+                            <li>Получите публичный и секретный ключи приложения</li>
+                            <li>Получите токен доступа с правами VALUABLE_ACCESS и GROUP_CONTENT</li>
+                            <li>Скопируйте все три параметра в поля настроек выше</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,122 @@
+<!-- Keyword Manager Component -->
+<div class="card sidebar">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0">
+            <i class="fas fa-key me-2"></i>
+            Ключевые слова
+        </h5>
+    </div>
+    <div class="card-body">
+        <!-- Form for adding new keywords -->
+        <form method="post" action="{{ url_for('search') }}">
+            <input type="hidden" name="action" value="add_keyword">
+            <div class="mb-3">
+                <label for="keyword" class="form-label">Новое ключевое слово</label>
+                <input type="text" class="form-control" id="keyword" name="keyword" required 
+                       placeholder="Введите ключевое слово">
+            </div>
+            <div class="mb-3">
+                <label for="color" class="form-label">Цвет выделения</label>
+                <div class="input-group">
+                    <span class="input-group-text color-preview" id="color-preview"></span>
+                    <input type="color" class="form-control color-picker" id="color" name="color" value="#ffff00">
+                </div>
+                <div class="form-text">Выберите цвет для выделения найденных слов</div>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>
+                    Добавить ключевое слово
+                </button>
+            </div>
+        </form>
+        
+        <hr>
+        
+        <!-- List of existing keywords -->
+        <h6>Список ключевых слов:</h6>
+        <div class="keyword-list mt-3">
+            {% if keywords %}
+                {% for keyword in keywords %}
+                    <div class="keyword-item d-flex justify-content-between align-items-center" 
+                         style="background-color: {{ keyword.color }}20;">
+                        <div>
+                            <span class="me-2">{{ keyword.keyword }}</span>
+                            <span class="badge rounded-pill" style="background-color: {{ keyword.color }}; color: #000">
+                                <i class="fas fa-paint-brush"></i>
+                            </span>
+                        </div>
+                        <form method="post" action="{{ url_for('search') }}" style="display: inline;">
+                            <input type="hidden" name="action" value="remove_keyword">
+                            <input type="hidden" name="keyword_id" value="{{ keyword.id }}">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-secondary">
+                    Нет добавленных ключевых слов
+                </div>
+            {% endif %}
+        </div>
+        
+        <hr>
+        
+        <!-- Search controls -->
+        <h6>Управление поиском:</h6>
+        <div class="d-grid gap-2 mt-3">
+            <form method="post" action="{{ url_for('search') }}">
+                <input type="hidden" name="action" value="manual_search">
+                <button type="submit" class="btn btn-primary w-100 mb-2">
+                    <i class="fas fa-search me-2"></i>
+                    Запустить поиск вручную
+                </button>
+            </form>
+            
+            {% if background_active %}
+                <form method="post" action="{{ url_for('search') }}">
+                    <input type="hidden" name="action" value="stop_search">
+                    <button type="submit" id="stop-search-btn" class="btn btn-danger w-100 mb-2">
+                        <i class="fas fa-stop me-2"></i>
+                        Остановить фоновый поиск
+                    </button>
+                </form>
+            {% else %}
+                <form method="post" action="{{ url_for('search') }}">
+                    <input type="hidden" name="action" value="start_search">
+                    <button type="submit" id="start-search-btn" class="btn btn-success w-100 mb-2">
+                        <i class="fas fa-play me-2"></i>
+                        Запустить фоновый поиск
+                    </button>
+                </form>
+            {% endif %}
+            
+            <form method="post" action="{{ url_for('search') }}">
+                <input type="hidden" name="action" value="export_csv">
+                <button type="submit" class="btn btn-info w-100">
+                    <i class="fas fa-file-export me-2"></i>
+                    Экспорт в CSV
+                </button>
+            </form>
+        </div>
+        
+        <!-- Current search status -->
+        <div class="mt-3">
+            <span class="fw-bold">Статус фонового поиска:</span>
+            <span id="search-status" class="ms-2">
+                {% if background_active %}
+                    <span class="badge bg-success">Активен</span>
+                {% else %}
+                    <span class="badge bg-secondary">Остановлен</span>
+                {% endif %}
+            </span>
+        </div>
+        
+        <!-- Progress indicator (if needed) -->
+        <div class="progress mt-3" id="searchProgress" style="display: {% if background_active %}block{% else %}none{% endif %};">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+        </div>
+    </div>
+</div>

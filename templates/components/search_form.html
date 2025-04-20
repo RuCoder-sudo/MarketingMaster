@@ -1,0 +1,66 @@
+<!-- Search Form Component for filtering mentions -->
+<form id="filter-form" method="get" action="{{ url_for('search') }}" class="mb-4 search-controls">
+    <div class="row">
+        <div class="col-md-6 mb-2">
+            <div class="input-group">
+                <span class="input-group-text">Фильтр по слову</span>
+                <input type="text" class="form-control" name="keyword" value="{{ keyword_filter or '' }}" placeholder="Введите слово">
+            </div>
+        </div>
+        <div class="col-md-4 mb-2">
+            <div class="input-group">
+                <span class="input-group-text">Соцсеть</span>
+                <select class="form-select" name="social_network">
+                    <option value="" {% if not social_network_filter %}selected{% endif %}>Все</option>
+                    <option value="vk" {% if social_network_filter == 'vk' %}selected{% endif %}>ВКонтакте</option>
+                    <option value="ok" {% if social_network_filter == 'ok' %}selected{% endif %}>Одноклассники</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-2 mb-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-filter"></i>
+            </button>
+        </div>
+    </div>
+</form>
+
+<!-- Optional advanced filters - can be shown/hidden with JavaScript -->
+<div class="collapse" id="advancedFilters">
+    <div class="card card-body mb-4">
+        <div class="row">
+            <div class="col-md-6 mb-2">
+                <div class="input-group">
+                    <span class="input-group-text">Дата от</span>
+                    <input type="date" class="form-control" name="date_from" value="{{ date_from or '' }}">
+                </div>
+            </div>
+            <div class="col-md-6 mb-2">
+                <div class="input-group">
+                    <span class="input-group-text">Дата до</span>
+                    <input type="date" class="form-control" name="date_to" value="{{ date_to or '' }}">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-2">
+                <div class="input-group">
+                    <span class="input-group-text">Автор</span>
+                    <input type="text" class="form-control" name="author" value="{{ author or '' }}" placeholder="ID или имя автора">
+                </div>
+            </div>
+            <div class="col-md-6 mb-2">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="exactMatch" name="exact_match" {% if exact_match %}checked{% endif %}>
+                    <label class="form-check-label" for="exactMatch">Точное совпадение слов</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mb-4">
+    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters">
+        <i class="fas fa-cog me-1"></i> Расширенный поиск
+    </button>
+</div>

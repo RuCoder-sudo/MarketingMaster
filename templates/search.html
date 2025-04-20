@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Поиск - Мониторинг упоминаний в соцсетях{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>
+            <i class="fas fa-search me-2"></i>
+            Поиск упоминаний
+        </h1>
+        <p class="lead">Управление ключевыми словами и поиск упоминаний в социальных сетях</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4 mb-4">
+        <div class="card sidebar">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-key me-2"></i>
+                    Ключевые слова
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('search') }}">
+                    <input type="hidden" name="action" value="add_keyword">
+                    <div class="mb-3">
+                        <label for="keyword" class="form-label">Новое ключевое слово</label>
+                        <input type="text" class="form-control" id="keyword" name="keyword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="color" class="form-label">Цвет выделения</label>
+                        <div class="input-group">
+                            <span class="input-group-text color-preview" id="color-preview"></span>
+                            <input type="color" class="form-control color-picker" id="color" name="color" value="#ffff00">
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>
+                            Добавить ключевое слово
+                        </button>
+                    </div>
+                </form>
+                
+                <hr>
+                
+                <h6>Список ключевых слов:</h6>
+                <div class="keyword-list mt-3">
+                    {% if keywords %}
+                        {% for keyword in keywords %}
+                            <div class="keyword-item" style="background-color: {{ keyword.color }}20;">
+                                <span>{{ keyword.keyword }}</span>
+                                <form method="post" action="{{ url_for('search') }}" style="display: inline;">
+                                    <input type="hidden" name="action" value="remove_keyword">
+                                    <input type="hidden" name="keyword_id" value="{{ keyword.id }}">
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-secondary">
+                            Нет добавленных ключевых слов
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <hr>
+                
+                <h6>Управление поиском:</h6>
+                <div class="d-grid gap-2 mt-3">
+                    <form method="post" action="{{ url_for('search') }}">
+                        <input type="hidden" name="action" value="manual_search">
+                        <button type="submit" class="btn btn-primary w-100 mb-2">
+                            <i class="fas fa-search me-2"></i>
+                            Запустить поиск вручную
+                        </button>
+                    </form>
+                    
+                    {% if background_active %}
+                        <form method="post" action="{{ url_for('search') }}">
+                            <input type="hidden" name="action" value="stop_search">
+                            <button type="submit" id="stop-search-btn" class="btn btn-danger w-100 mb-2">
+                                <i class="fas fa-stop me-2"></i>
+                                Остановить фоновый поиск
+                            </button>
+                        </form>
+                    {% else %}
+                        <form method="post" action="{{ url_for('search') }}">
+                            <input type="hidden" name="action" value="start_search">
+                            <button type="submit" id="start-search-btn" class="btn btn-success w-100 mb-2">
+                                <i class="fas fa-play me-2"></i>
+                                Запустить фоновый поиск
+                            </button>
+                        </form>
+                    {% endif %}
+                    
+                    <form method="post" action="{{ url_for('search') }}">
+                        <input type="hidden" name="action" value="export_csv">
+                        <button type="submit" class="btn btn-info w-100">
+                            <i class="fas fa-file-export me-2"></i>
+                            Экспорт в CSV
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="mt-3">
+                    <span class="fw-bold">Статус фонового поиска:</span>
+                    <span id="search-status" class="ms-2">
+                        {% if background_active %}
+                            <span class="badge bg-success">Активен</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Остановлен</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-comment-dots me-2"></i>
+                    Результаты поиска
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="filter-form" method="get" action="{{ url_for('search') }}" class="mb-4 search-controls">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <div class="input-group">
+                                <span class="input-group-text">Фильтр по слову</span>
+                                <input type="text" class="form-control" name="keyword" value="{{ keyword_filter or '' }}" placeholder="Введите слово">
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <div class="input-group">
+                                <span class="input-group-text">Соцсеть</span>
+                                <select class="form-select" name="social_network">
+                                    <option value="" {% if not social_network_filter %}selected{% endif %}>Все</option>
+                                    <option value="vk" {% if social_network_filter == 'vk' %}selected{% endif %}>ВКонтакте</option>
+                                    <option value="ok" {% if social_network_filter == 'ok' %}selected{% endif %}>Одноклассники</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-filter"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                {% if mentions.items %}
+                    <div class="mentions-list">
+                        {% for mention in mentions.items %}
+                            <div class="card mention-card mb-3 {{ mention.social_network }}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <span class="badge badge-{{ mention.social_network }} me-2">
+                                                {% if mention.social_network == 'vk' %}
+                                                    <i class="fab fa-vk"></i> ВКонтакте
+                                                {% elif mention.social_network == 'ok' %}
+                                                    <i class="fab fa-odnoklassniki"></i> Одноклассники
+                                                {% endif %}
+                                            </span>
+                                            <span class="text-muted">
+                                                <i class="fas fa-calendar-alt me-1"></i>
+                                                {{ mention.post_date.strftime('%d.%m.%Y %H:%M') if mention.post_date else 'Нет даты' }}
+                                            </span>
+                                        </div>
+                                        <a href="{{ mention.post_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-external-link-alt me-1"></i>
+                                            Оригинал
+                                        </a>
+                                    </div>
+                                    
+                                    <div class="mention-content mb-3">
+                                        <p>{{ mention.highlighted_content|safe }}</p>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-user me-1"></i>
+                                            <span class="fw-bold">{{ mention.author_name or 'Пользователь' }}</span>
+                                            <small class="text-muted ms-1">(ID: {{ mention.author_id }})</small>
+                                        </div>
+                                        <small class="text-muted">
+                                            Найдено: {{ mention.found_date.strftime('%d.%m.%Y %H:%M') }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            {% if mentions.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('search', page=mentions.prev_num, keyword=keyword_filter, social_network=social_network_filter) }}">
+                                        <i class="fas fa-chevron-left"></i> Предыдущая
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fas fa-chevron-left"></i> Предыдущая</span>
+                                </li>
+                            {% endif %}
+                            
+                            {% for page_num in mentions.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                                {% if page_num %}
+                                    {% if page_num == mentions.page %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ page_num }}</span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('search', page=page_num, keyword=keyword_filter, social_network=social_network_filter) }}">{{ page_num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if mentions.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('search', page=mentions.next_num, keyword=keyword_filter, social_network=social_network_filter) }}">
+                                        Следующая <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">Следующая <i class="fas fa-chevron-right"></i></span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Упоминаний пока не найдено. Добавьте ключевые слова и запустите поиск.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

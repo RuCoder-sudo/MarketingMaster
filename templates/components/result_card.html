@@ -1,0 +1,42 @@
+<!-- Result Card Component for displaying a mention from social networks -->
+<div class="card mention-card mb-3 {{ mention.social_network }}">
+    <div class="card-body">
+        <!-- Header with metadata and link to original -->
+        <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+                <span class="badge badge-{{ mention.social_network }} me-2">
+                    {% if mention.social_network == 'vk' %}
+                        <i class="fab fa-vk"></i> ВКонтакте
+                    {% elif mention.social_network == 'ok' %}
+                        <i class="fab fa-odnoklassniki"></i> Одноклассники
+                    {% endif %}
+                </span>
+                <span class="text-muted">
+                    <i class="fas fa-calendar-alt me-1"></i>
+                    {{ mention.post_date.strftime('%d.%m.%Y %H:%M') if mention.post_date else 'Нет даты' }}
+                </span>
+            </div>
+            <a href="{{ mention.post_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-external-link-alt me-1"></i>
+                Оригинал
+            </a>
+        </div>
+        
+        <!-- Content with highlighted keywords -->
+        <div class="mention-content mb-3">
+            <p>{{ mention.highlighted_content|safe }}</p>
+        </div>
+        
+        <!-- Footer with author information and found date -->
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-user me-1"></i>
+                <span class="fw-bold">{{ mention.author_name or 'Пользователь' }}</span>
+                <small class="text-muted ms-1">(ID: {{ mention.author_id }})</small>
+            </div>
+            <small class="text-muted">
+                Найдено: {{ mention.found_date.strftime('%d.%m.%Y %H:%M') }}
+            </small>
+        </div>
+    </div>
+</div>

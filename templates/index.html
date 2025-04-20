@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Мониторинг упоминаний в соцсетях{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto text-center">
+        <h1 class="display-4 mb-4">Мониторинг упоминаний в соцсетях</h1>
+        <p class="lead mb-5">
+            Отслеживайте упоминания в ВКонтакте и Одноклассниках с помощью простого и удобного инструмента.
+        </p>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-3 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-cog fa-4x text-primary mb-3"></i>
+                <h3 class="card-title">Настройки</h3>
+                <p class="card-text">
+                    Настройте токены API для ВКонтакте и Одноклассники, добавьте сообщества для мониторинга.
+                </p>
+                <a href="{{ url_for('settings') }}" class="btn btn-primary">Перейти</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-search fa-4x text-success mb-3"></i>
+                <h3 class="card-title">Поиск</h3>
+                <p class="card-text">
+                    Добавляйте ключевые слова и ищите упоминания в сообществах социальных сетей.
+                </p>
+                <a href="{{ url_for('search') }}" class="btn btn-success">Перейти</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-clipboard-list fa-4x text-info mb-3"></i>
+                <h3 class="card-title">Логи</h3>
+                <p class="card-text">
+                    Просматривайте логи работы системы, экспортируйте или очищайте историю.
+                </p>
+                <a href="{{ url_for('logs') }}" class="btn btn-info">Перейти</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-tools fa-4x text-warning mb-3"></i>
+                <h3 class="card-title">Дополнительно</h3>
+                <p class="card-text">
+                    Управляйте проектами, настраивайте уведомления и другие функции системы.
+                </p>
+                <a href="{{ url_for('extra') }}" class="btn btn-warning">Перейти</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-dark">
+                <h4 class="mb-0">
+                    <i class="fas fa-project-diagram me-2"></i>
+                    Текущий проект: {{ active_project.name if active_project else 'Не выбран' }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Статистика проекта</h5>
+                        <div class="list-group">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-key me-2"></i> Ключевых слов</span>
+                                <span class="badge bg-primary rounded-pill">{{ active_project.keywords|length if active_project else 0 }}</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-comment me-2"></i> Найденных упоминаний</span>
+                                <span class="badge bg-success rounded-pill">{{ active_project.mentions|length if active_project else 0 }}</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="fab fa-vk me-2"></i> Сообществ ВКонтакте</span>
+                                {% set vk_communities = active_project.settings[0].vk_communities.split(',') if active_project and active_project.settings and active_project.settings[0].vk_communities else [] %}
+                                <span class="badge bg-primary rounded-pill">{{ vk_communities|length }}</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="fab fa-odnoklassniki me-2"></i> Сообществ Одноклассники</span>
+                                {% set ok_communities = active_project.settings[0].ok_communities.split(',') if active_project and active_project.settings and active_project.settings[0].ok_communities else [] %}
+                                <span class="badge bg-warning rounded-pill">{{ ok_communities|length }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Быстрые действия</h5>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('settings') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-cog me-2"></i> Настройки проекта
+                            </a>
+                            <a href="{{ url_for('search') }}" class="btn btn-outline-success">
+                                <i class="fas fa-search me-2"></i> Поиск упоминаний
+                            </a>
+                            <a href="{{ url_for('project_management') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-project-diagram me-2"></i> Управление проектами
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-lg-8 mx-auto">
+        <div class="card bg-dark">
+            <div class="card-body">
+                <h4 class="text-center mb-4">Как начать работу</h4>
+                <div class="accordion" id="howToStartAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                1. Настройте токены API
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#howToStartAccordion">
+                            <div class="accordion-body">
+                                <p>Перейдите в раздел <a href="{{ url_for('settings') }}">Настройки</a> и добавьте токены API для ВКонтакте и Одноклассники, чтобы получить доступ к данным социальных сетей.</p>
+                                <a href="{{ url_for('settings') }}" class="btn btn-sm btn-primary">Перейти к настройкам</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                2. Добавьте сообщества для мониторинга
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#howToStartAccordion">
+                            <div class="accordion-body">
+                                <p>В настройках добавьте ID сообществ ВКонтакте и Одноклассников, которые вы хотите мониторить.</p>
+                                <a href="{{ url_for('settings') }}" class="btn btn-sm btn-primary">Перейти к настройкам</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                3. Добавьте ключевые слова
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#howToStartAccordion">
+                            <div class="accordion-body">
+                                <p>Перейдите в раздел <a href="{{ url_for('search') }}">Поиск</a> и добавьте ключевые слова, по которым будет производиться поиск упоминаний.</p>
+                                <a href="{{ url_for('search') }}" class="btn btn-sm btn-success">Перейти к поиску</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingFour">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                4. Запустите поиск
+                            </button>
+                        </h2>
+                        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#howToStartAccordion">
+                            <div class="accordion-body">
+                                <p>Запустите ручной поиск или настройте фоновый поиск для автоматического мониторинга упоминаний в выбранных сообществах.</p>
+                                <a href="{{ url_for('search') }}" class="btn btn-sm btn-success">Перейти к поиску</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

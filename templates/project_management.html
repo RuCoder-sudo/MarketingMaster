@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Управление проектами - Мониторинг упоминаний в соцсетях{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>
+            <i class="fas fa-project-diagram me-2"></i>
+            Управление проектами
+        </h1>
+        <p class="lead">Создание, редактирование и управление проектами мониторинга (максимум 5)</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Создать новый проект
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('project_management') }}">
+                    <input type="hidden" name="action" value="create_project">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Название проекта" name="project_name" required>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-plus me-2"></i>
+                            Создать проект
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Мои проекты ({{ projects|length }}/5)
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if projects %}
+                    <div class="row">
+                        {% for project in projects %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card project-card h-100 {% if active_project and active_project.id == project.id %}active{% endif %}">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">{{ project.name }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <small class="text-muted">Дата создания:</small>
+                                            <p>{{ project.created_at.strftime('%d.%m.%Y %H:%M') }}</p>
+                                        </div>
+                                        
+                                        <!-- Project stats -->
+                                        <div class="list-group mb-3">
+                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>Ключевые слова</span>
+                                                <span class="badge bg-primary rounded-pill">{{ project.keywords|length }}</span>
+                                            </div>
+                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>Упоминания</span>
+                                                <span class="badge bg-success rounded-pill">{{ project.mentions|length }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                {% if active_project and active_project.id == project.id %}
+                                                    <span class="badge bg-success">Активный</span>
+                                                {% else %}
+                                                    <a href="{{ url_for('set_active_project', project_id=project.id) }}" class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-check me-1"></i>
+                                                        Выбрать
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <button class="btn btn-sm btn-warning rename-project-btn" 
+                                                        data-project-id="{{ project.id }}" 
+                                                        data-project-name="{{ project.name }}">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                
+                                                {% if projects|length > 1 %}
+                                                    <form method="post" action="{{ url_for('project_management') }}" class="d-inline">
+                                                        <input type="hidden" name="action" value="delete_project">
+                                                        <input type="hidden" name="project_id" value="{{ project.id }}">
+                                                        <button type="submit" class="btn btn-sm btn-danger" 
+                                                                data-confirm="Вы уверены, что хотите удалить проект '{{ project.name }}'? Это действие нельзя отменить.">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        У вас пока нет проектов. Создайте первый проект, используя форму выше.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rename Project Modal -->
+<div class="modal fade" id="renameProjectModal" tabindex="-1" aria-labelledby="renameProjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="renameProjectModalLabel">Переименовать проект</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{{ url_for('project_management') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="rename_project">
+                    <input type="hidden" name="project_id" id="project_id">
+                    <div class="mb-3">
+                        <label for="new_name" class="form-label">Новое название</label>
+                        <input type="text" class="form-control" id="new_name" name="new_name" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Дополнительно - Мониторинг упоминаний в соцсетях{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>
+            <i class="fas fa-tools me-2"></i>
+            Дополнительные функции
+        </h1>
+        <p class="lead">Дополнительные инструменты и функции системы мониторинга</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0">
+                    <i class="fas fa-project-diagram me-2"></i>
+                    Управление проектами
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>Создавайте, редактируйте и управляйте проектами мониторинга упоминаний.</p>
+                <a href="{{ url_for('project_management') }}" class="btn btn-warning">
+                    <i class="fas fa-project-diagram me-2"></i>
+                    Перейти к управлению проектами
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-info">
+                <h5 class="mb-0">
+                    <i class="fas fa-question-circle me-2"></i>
+                    Справка по API
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6 class="mb-3">ВКонтакте API</h6>
+                <p>Для работы с API ВКонтакте необходимо:</p>
+                <ul>
+                    <li>Создать приложение на странице <a href="https://vk.com/dev/standalone" target="_blank">разработчика ВКонтакте</a></li>
+                    <li>Получить токен доступа с правами на работу со стеной и группами</li>
+                    <li>Указать токен в настройках приложения</li>
+                </ul>
+                <p>Документация API:</p>
+                <ul>
+                    <li><a href="https://vk.com/dev/wall.get" target="_blank">wall.get</a> - метод для получения записей со стены</li>
+                    <li><a href="https://vk.com/dev/groups.getById" target="_blank">groups.getById</a> - метод для получения информации о группах</li>
+                </ul>
+                
+                <h6 class="mb-3 mt-4">Одноклассники API</h6>
+                <p>Для работы с API Одноклассники необходимо:</p>
+                <ul>
+                    <li>Создать приложение на <a href="https://ok.ru/dk?st.cmd=appEdit&st._aid=Apps_Info_MyDev_AddApp" target="_blank">странице разработчика Одноклассники</a></li>
+                    <li>Получить публичный и секретный ключи приложения</li>
+                    <li>Получить токен доступа для работы с API</li>
+                </ul>
+                <p>Документация API:</p>
+                <ul>
+                    <li><a href="https://apiok.ru/dev/methods/rest/stream/stream.get" target="_blank">stream.get</a> - метод для получения потока активности</li>
+                    <li><a href="https://apiok.ru/dev/methods/rest/mediatopic/mediatopic.get" target="_blank">mediatopic.get</a> - метод для получения записей из группы</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-secondary">
+                <h5 class="mb-0">
+                    <i class="fas fa-cogs me-2"></i>
+                    О системе
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>Система мониторинга упоминаний в социальных сетях</h6>
+                <p>
+                    Данное приложение позволяет отслеживать упоминания в сообществах социальных сетей ВКонтакте и Одноклассники
+                    по заданным ключевым словам.
+                </p>
+                
+                <h6 class="mt-4">Основные возможности:</h6>
+                <ul>
+                    <li>Мониторинг упоминаний в сообществах ВКонтакте и Одноклассники</li>
+                    <li>Поиск по ключевым словам</li>
+                    <li>Выделение найденных ключевых слов цветом</li>
+                    <li>Экспорт результатов в CSV</li>
+                    <li>Управление несколькими проектами (до 5)</li>
+                    <li>Фоновый автоматический поиск</li>
+                    <li>Система логирования</li>
+                </ul>
+                
+                <h6 class="mt-4">Технические детали:</h6>
+                <ul>
+                    <li>Фреймворк: Flask (Python)</li>
+                    <li>База данных: SQLite</li>
+                    <li>Интерфейс: Bootstrap 5</li>
+                    <li>Фоновые задачи: Python Threading</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    Советы по использованию
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="tipsAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                Эффективный подбор ключевых слов
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#tipsAccordion">
+                            <div class="accordion-body">
+                                <p>Для эффективного мониторинга упоминаний используйте следующие подходы:</p>
+                                <ul>
+                                    <li>Используйте разные формы слова (например, "товар", "товары", "товаром")</li>
+                                    <li>Добавляйте часто встречающиеся опечатки</li>
+                                    <li>Включайте имена конкурентов и название вашей компании</li>
+                                    <li>Используйте профессиональные термины, связанные с вашей отраслью</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                Оптимизация фонового поиска
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#tipsAccordion">
+                            <div class="accordion-body">
+                                <p>Для оптимальной работы фонового поиска:</p>
+                                <ul>
+                                    <li>Не добавляйте слишком много сообществ для одновременного мониторинга (оптимально до 10-15)</li>
+                                    <li>Имейте в виду ограничения API социальных сетей по количеству запросов</li>
+                                    <li>При большом количестве результатов рекомендуется экспортировать их регулярно, чтобы снизить нагрузку на систему</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                Работа с несколькими проектами
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#tipsAccordion">
+                            <div class="accordion-body">
+                                <p>Эффективное использование нескольких проектов:</p>
+                                <ul>
+                                    <li>Создавайте отдельные проекты для разных клиентов или направлений бизнеса</li>
+                                    <li>Используйте разные API токены для разных проектов, чтобы не превышать лимиты запросов</li>
+                                    <li>Регулярно экспортируйте данные отдельно по каждому проекту</li>
+                                    <li>Используйте понятные названия проектов для удобной навигации</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
