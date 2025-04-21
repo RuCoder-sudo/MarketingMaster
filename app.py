@@ -271,6 +271,25 @@ def search():
             else:
                 flash(f'Keyword "{keyword_text}" already exists!', 'warning')
         
+        elif action == 'update_keyword_color':
+            keyword_id = request.form.get('keyword_id')
+            new_color = request.form.get('color')
+            
+            if not new_color:
+                flash('Color value is required!', 'danger')
+                return redirect(url_for('search'))
+                
+            keyword = Keyword.query.get(keyword_id)
+            
+            if keyword and keyword.project_id == active_project.id:
+                old_color = keyword.color
+                keyword.color = new_color
+                db.session.commit()
+                flash(f'Updated color for keyword "{keyword.keyword}" from {old_color} to {new_color}!', 'success')
+                save_log(f"Updated color for keyword '{keyword.keyword}' from {old_color} to {new_color}")
+            else:
+                flash('Keyword not found or does not belong to current project!', 'danger')
+        
         elif action == 'remove_keyword':
             keyword_id = request.form.get('keyword_id')
             keyword = Keyword.query.get(keyword_id)
@@ -433,7 +452,7 @@ def search():
                 flash(f'Error during search: {str(e)}', 'danger')
                 save_log(f"Error during manual search: {str(e)}", level="ERROR")
         
-        elif action == 'export_csv':
+        elif action == 'export_csv' or action == 'export_excel':
             # Export mentions to CSV
             mentions = Mention.query.filter_by(project_id=active_project.id).all()
             
@@ -457,19 +476,47 @@ def search():
             
             df = pd.DataFrame(data)
             
-            # Create CSV in memory
-            output = io.BytesIO()
-            df.to_csv(output, index=False, encoding='utf-8-sig')
-            output.seek(0)
-            
-            # Generate filename
+            # Generate filename with timestamp
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = f"mentions_{active_project.name}_{timestamp}.csv"
             
-            save_log(f"Exported data to CSV for project {active_project.name}")
+            if action == 'export_csv':
+                # Create CSV in memory
+                output = io.BytesIO()
+                df.to_csv(output, index=False, encoding='utf-8-sig')
+                output.seek(0)
+                
+                filename = f"mentions_{active_project.name}_{timestamp}.csv"
+                mimetype = 'text/csv'
+                save_log(f"Exported data to CSV for project {active_project.name}")
+            else:  # export_excel
+                # Create Excel in memory
+                output = io.BytesIO()
+                
+                # Use openpyxl as the Excel engine
+                with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                    df.to_excel(writer, sheet_name='Mentions', index=False)
+                    
+                    # Auto-adjust columns' width
+                    worksheet = writer.sheets['Mentions']
+                    for idx, col in enumerate(df.columns):
+                        # Find the maximum length in the column
+                        max_len = max(
+                            df[col].astype(str).map(len).max(),  # max length of values
+                            len(str(col))  # length of column name
+                        ) + 2  # adding a little extra space
+                        
+                        # Set the column width
+                        worksheet.column_dimensions[chr(65 + idx)].width = min(max_len, 50)  # limit to 50 width max
+                
+                output.seek(0)
+                
+                filename = f"mentions_{active_project.name}_{timestamp}.xlsx"
+                mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                save_log(f"Exported data to Excel for project {active_project.name}")
+            
             return send_file(
                 output,
-                mimetype='text/csv',
+                mimetype=mimetype,
                 download_name=filename,
                 as_attachment=True
             )

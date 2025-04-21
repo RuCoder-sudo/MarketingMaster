@@ -52,13 +52,21 @@
                         {% for keyword in keywords %}
                             <div class="keyword-item" style="background-color: {{ keyword.color }}20;">
                                 <span>{{ keyword.keyword }}</span>
-                                <form method="post" action="{{ url_for('search') }}" style="display: inline;">
-                                    <input type="hidden" name="action" value="remove_keyword">
-                                    <input type="hidden" name="keyword_id" value="{{ keyword.id }}">
-                                    <button type="submit" class="btn btn-sm btn-danger">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                <div class="keyword-actions">
+                                    <form method="post" action="{{ url_for('search') }}" style="display: inline;">
+                                        <input type="hidden" name="action" value="update_keyword_color">
+                                        <input type="hidden" name="keyword_id" value="{{ keyword.id }}">
+                                        <input type="color" name="color" value="{{ keyword.color }}" class="color-picker-small" 
+                                               title="Изменить цвет" onchange="this.form.submit()">
+                                    </form>
+                                    <form method="post" action="{{ url_for('search') }}" style="display: inline;">
+                                        <input type="hidden" name="action" value="remove_keyword">
+                                        <input type="hidden" name="keyword_id" value="{{ keyword.id }}">
+                                        <button type="submit" class="btn btn-sm btn-danger ms-1">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         {% endfor %}
                     {% else %}
