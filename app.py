@@ -37,7 +37,8 @@ db.init_app(app)
 
 # Import components after initializing db to avoid circular imports
 from models import Project, Settings, Keyword, Mention, Log
-from social_api import search_vk, search_ok
+from social_api import search_vk, search_ok, search_telegram, search_instagram
+from notifications import send_notifications
 from background_tasks import BackgroundSearcher
 from utils import highlight_text, get_active_project, save_log
 
@@ -392,6 +393,35 @@ def search():
                 flash(flash_message, 'success')
                 save_log(f"Ручной поиск завершен для проекта {active_project.name}. "
                        f"Найдено: ВК - {vk_count}, OK - {ok_count}, Telegram - {telegram_count}, Instagram - {instagram_count}")
+                
+                # Проверяем, нужно ли отправить уведомления
+                if settings.enable_email_notifications or settings.enable_telegram_notifications:
+                    total_count = vk_count + ok_count + telegram_count + instagram_count
+                    if total_count > 0:
+                        try:
+                            # Получаем упоминания, найденные в последнюю минуту (новые упоминания из этого поиска)
+                            one_minute_ago = datetime.utcnow() - timedelta(minutes=1)
+                            new_mentions = Mention.query.filter(
+                                Mention.project_id == active_project.id,
+                                Mention.found_date >= one_minute_ago
+                            ).all()
+                            
+                            if new_mentions:
+                                save_log(f"Отправка уведомлений о {len(new_mentions)} новых упоминаниях")
+                                notification_result = send_notifications(active_project.id, new_mentions)
+                                
+                                # Логируем результаты отправки уведомлений
+                                if notification_result["email"]:
+                                    save_log("Уведомление по email отправлено успешно")
+                                elif settings.enable_email_notifications:
+                                    save_log("Не удалось отправить уведомление по email", level="WARNING")
+                                    
+                                if notification_result["telegram"]:
+                                    save_log("Уведомление в Telegram отправлено успешно")
+                                elif settings.enable_telegram_notifications:
+                                    save_log("Не удалось отправить уведомление в Telegram", level="WARNING")
+                        except Exception as e:
+                            save_log(f"Ошибка при отправке уведомлений: {str(e)}", level="ERROR")
                 
                 # Передаем в шаблон флаг, чтобы скрыть индикатор загрузки
                 session['hide_loading'] = True
