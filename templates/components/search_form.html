@@ -25,23 +25,25 @@
     </div>
 </form>
 
+<!-- Фильтры по дате - добавлены в основную форму -->
+<div class="row mt-3">
+    <div class="col-md-6 mb-2">
+        <div class="input-group">
+            <span class="input-group-text">Дата от</span>
+            <input type="date" class="form-control" name="date_from" value="{{ date_from or '' }}">
+        </div>
+    </div>
+    <div class="col-md-6 mb-2">
+        <div class="input-group">
+            <span class="input-group-text">Дата до</span>
+            <input type="date" class="form-control" name="date_to" value="{{ date_to or '' }}">
+        </div>
+    </div>
+</div>
+
 <!-- Optional advanced filters - can be shown/hidden with JavaScript -->
 <div class="collapse" id="advancedFilters">
     <div class="card card-body mb-4">
-        <div class="row">
-            <div class="col-md-6 mb-2">
-                <div class="input-group">
-                    <span class="input-group-text">Дата от</span>
-                    <input type="date" class="form-control" name="date_from" value="{{ date_from or '' }}">
-                </div>
-            </div>
-            <div class="col-md-6 mb-2">
-                <div class="input-group">
-                    <span class="input-group-text">Дата до</span>
-                    <input type="date" class="form-control" name="date_to" value="{{ date_to or '' }}">
-                </div>
-            </div>
-        </div>
         <div class="row">
             <div class="col-md-6 mb-2">
                 <div class="input-group">
@@ -61,6 +63,6 @@
 
 <div class="text-center mb-4">
     <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters">
-        <i class="fas fa-cog me-1"></i> Расширенный поиск
+        <i class="fas fa-cog me-1 text-purple"></i> Расширенный поиск
     </button>
 </div>
