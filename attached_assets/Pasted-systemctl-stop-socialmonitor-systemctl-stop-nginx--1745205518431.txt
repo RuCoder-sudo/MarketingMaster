@@ -1,0 +1,76 @@
+systemctl stop socialmonitor
+systemctl stop nginx
+Создайте резервную копию текущего проекта (на всякий случай):
+
+cp -r /root/MarketingMaster /root/MarketingMaster_backup
+Удалите текущую папку проекта:
+
+rm -rf /root/MarketingMaster
+Создайте новую папку:
+
+mkdir -p /root/MarketingMaster
+Шаг 3: Перенос файлов
+Используйте MobaXterm для загрузки всех файлов из распакованного архива в папку /root/MarketingMaster/ на сервере
+Шаг 4: Быстрая настройка и запуск
+Создайте .env файл:
+
+cd /root/MarketingMaster
+nano .env
+Вставьте:
+
+DATABASE_URL=postgresql://socialmonitor:ваш_пароль@localhost:5432/social_monitoring
+SECRET_KEY=ваш_секретный_ключ
+(Используйте те же значения, что и раньше)
+
+Установите Python и зависимости:
+
+apt update
+apt install -y python3-pip python3-venv
+python3 -m venv venv
+source venv/bin/activate
+pip install flask flask-sqlalchemy gunicorn psycopg2-binary email-validator pandas requests werkzeug
+Настройте службу:
+
+nano /etc/systemd/system/socialmonitor.service
+Вставьте:
+
+[Unit]
+Description=Social Media Monitoring Flask App
+After=network.target
+[Service]
+User=root
+WorkingDirectory=/root/MarketingMaster
+EnvironmentFile=/root/MarketingMaster/.env
+ExecStart=/root/MarketingMaster/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:5001 main:app
+Restart=always
+[Install]
+WantedBy=multi-user.target
+Настройте Nginx:
+
+nano /etc/nginx/sites-available/socialmonitor
+Вставьте:
+
+server {
+    listen 80;
+    server_name f418b3c5b5c3.vps.myjino.ru;
+    
+    location / {
+        proxy_pass http://localhost:5001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+    }
+}
+Запустите службы:
+
+systemctl daemon-reload
+systemctl enable socialmonitor
+systemctl start socialmonitor
+systemctl start nginx
+Проверьте статус:
+
+systemctl status socialmonitor
+systemctl status nginx
