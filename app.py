@@ -90,6 +90,31 @@ def settings():
             flash('API токены успешно сохранены!', 'success')
             save_log(f"API токены обновлены для проекта {active_project.name}")
             
+        elif action == 'save_notifications':
+            # Save notification settings
+            # Update or create settings
+            settings = Settings.query.filter_by(project_id=active_project.id).first()
+            if not settings:
+                settings = Settings(project_id=active_project.id)
+                db.session.add(settings)
+            
+            # Флажки для включения/выключения уведомлений
+            settings.enable_email_notifications = 'enable_email_notifications' in request.form
+            settings.enable_telegram_notifications = 'enable_telegram_notifications' in request.form
+            
+            # Email и Telegram ID для уведомлений
+            settings.notification_email = request.form.get('notification_email', '')
+            settings.notification_telegram_chat_id = request.form.get('notification_telegram_chat_id', '')
+            
+            # Интервал поиска
+            search_interval = request.form.get('search_interval')
+            if search_interval and search_interval.isdigit():
+                settings.search_interval = int(search_interval)
+            
+            db.session.commit()
+            flash('Настройки уведомлений успешно сохранены!', 'success')
+            save_log(f"Настройки уведомлений обновлены для проекта {active_project.name}")
+            
         elif action == 'add_community':
             # Add community to monitor
             social_network = request.form.get('social_network')

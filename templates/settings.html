@@ -525,6 +525,22 @@
                                 </div>
                             </div>
                             
+                            <hr>
+                            
+                            <!-- Настройки автоматического поиска -->
+                            <div class="mb-4">
+                                <h6>Автоматический поиск</h6>
+                                <div class="mt-2">
+                                    <label for="search_interval" class="form-label">Интервал поиска (в секундах)</label>
+                                    <input type="number" class="form-control" id="search_interval" name="search_interval" min="300" 
+                                           value="{{ settings.search_interval if settings and settings.search_interval else 3600 }}">
+                                    <div class="form-text text-muted">
+                                        Интервал между автоматическими поисками (в секундах). Минимальное значение: 300 секунд (5 минут).<br>
+                                        По умолчанию: 3600 секунд (1 час).
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div class="mt-4">
                                 <button type="submit" class="btn btn-success">Сохранить настройки уведомлений</button>
                             </div>

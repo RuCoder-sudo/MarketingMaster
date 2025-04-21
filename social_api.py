@@ -297,6 +297,9 @@ def search_telegram(project_id, keywords, start_date=None, end_date=None):
         keywords (list): List of keywords to search for
         start_date (datetime): Start date for search
         end_date (datetime): End date for search
+        
+    Returns:
+        int: Number of new mentions found
     """
     # Get Telegram API credentials
     settings = Settings.query.filter_by(project_id=project_id).first()
@@ -430,4 +433,137 @@ def search_telegram(project_id, keywords, start_date=None, end_date=None):
     except Exception as e:
         db.session.rollback()
         save_log(f"Error during Telegram search: {str(e)}", level="ERROR")
+        raise
+        
+def search_instagram(project_id, keywords, start_date=None, end_date=None):
+    """
+    Search for mentions in Instagram posts
+    
+    Args:
+        project_id (int): Project ID
+        keywords (list): List of keywords to search for
+        start_date (datetime): Start date for search
+        end_date (datetime): End date for search
+        
+    Returns:
+        int: Number of new mentions found
+    """
+    # Get Instagram API credentials
+    settings = Settings.query.filter_by(project_id=project_id).first()
+    if not settings or not settings.instagram_token:
+        save_log(f"Instagram API token not found for project {project_id}", level="ERROR")
+        raise ValueError("Instagram API token not found")
+    
+    # Check if there are accounts to monitor
+    if not settings.instagram_accounts:
+        save_log(f"No Instagram accounts configured for project {project_id}", level="WARNING")
+        return 0
+    
+    try:
+        instagram_token = settings.instagram_token
+        found_count = 0
+        
+        # Get accounts list (comma-separated)
+        accounts = [a.strip() for a in settings.instagram_accounts.split(",") if a.strip()]
+        
+        save_log(f"Searching Instagram accounts: {', '.join(accounts)} for keywords: {', '.join(keywords)}", level="INFO")
+        
+        # For each account
+        for account in accounts:
+            try:
+                # Base URL for Instagram Graph API
+                graph_api_base = "https://graph.instagram.com/v17.0"
+                
+                # 1. Get account info (will need the actual user ID first)
+                # This is a simplified example - in reality, the proper flow would include:
+                # - Get the page ID from the Facebook Page associated with the Instagram account
+                # - Get the Instagram Business Account ID
+                # - Use that ID to get media
+                
+                # For this example, we'll use a simplified approach that assumes we already have
+                # the Instagram Business Account ID in the 'account' variable
+                
+                # Get user's media
+                response = requests.get(
+                    f"{graph_api_base}/me/media",
+                    params={
+                        "fields": "id,caption,media_type,media_url,permalink,timestamp",
+                        "access_token": instagram_token
+                    }
+                )
+                data = response.json()
+                
+                if "error" in data:
+                    error_message = data.get("error", {}).get("message", "Unknown error")
+                    save_log(f"Error fetching Instagram media for {account}: {error_message}", level="ERROR")
+                    continue
+                
+                media_items = data.get("data", [])
+                
+                for media in media_items:
+                    # Get info from media
+                    media_id = media.get("id")
+                    caption = media.get("caption", "")
+                    permalink = media.get("permalink", "")
+                    media_type = media.get("media_type", "")
+                    
+                    # Skip if no caption
+                    if not caption:
+                        continue
+                    
+                    # Get post date
+                    timestamp_str = media.get("timestamp")
+                    post_date = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00")) if timestamp_str else datetime.now()
+                    
+                    # Skip if outside date range
+                    if start_date and post_date < start_date:
+                        continue
+                    if end_date and post_date > end_date:
+                        continue
+                    
+                    # Check if post contains any of the keywords
+                    for keyword in keywords:
+                        if keyword.lower() in caption.lower():
+                            # Check if this post is already in the database
+                            existing = Mention.query.filter_by(
+                                project_id=project_id,
+                                social_network="instagram",
+                                author_id=account,
+                                message_id=str(media_id)
+                            ).first()
+                            
+                            if not existing:
+                                # Create a new mention
+                                mention = Mention(
+                                    project_id=project_id,
+                                    social_network="instagram",
+                                    content=caption,
+                                    post_url=permalink,
+                                    post_date=post_date,
+                                    author_id=account,
+                                    author_name=account,
+                                    message_id=str(media_id)
+                                )
+                                
+                                db.session.add(mention)
+                                found_count += 1
+                            
+                            break  # No need to check other keywords for this post
+                    
+            except Exception as e:
+                save_log(f"Error processing Instagram account {account}: {str(e)}", level="ERROR")
+                # Continue with other accounts
+        
+        # Commit all new mentions
+        if found_count > 0:
+            db.session.commit()
+            save_log(f"Found {found_count} new mentions in Instagram accounts", level="INFO")
+        else:
+            save_log(f"No new mentions found in Instagram accounts", level="INFO")
+        
+        return found_count
+    
+    except Exception as e:
+        db.session.rollback()
+        save_log(f"Error during Instagram search: {str(e)}", level="ERROR")
         raise
