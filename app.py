@@ -226,30 +226,66 @@ def search():
             # Check if we have API tokens
             settings = Settings.query.filter_by(project_id=active_project.id).first()
             if not settings or (not settings.vk_token and not settings.ok_token):
-                flash('You need to set up API tokens in Settings first!', 'danger')
+                flash('Необходимо настроить API токены в разделе Настройки!', 'danger')
                 return redirect(url_for('search'))
             
             # Check if we have keywords
             if not keywords:
-                flash('You need to add at least one keyword before searching!', 'danger')
+                flash('Необходимо добавить хотя бы одно ключевое слово перед поиском!', 'danger')
                 return redirect(url_for('search'))
+                
+            # Получаем даты из формы, если они указаны
+            start_date_str = request.form.get('date_from')
+            end_date_str = request.form.get('date_to')
+            
+            start_date = None
+            end_date = None
+            
+            # Преобразуем строки дат в объекты datetime
+            if start_date_str:
+                try:
+                    start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+                    save_log(f"Поиск с начальной датой: {start_date}")
+                except ValueError:
+                    save_log("Неверный формат даты начала", level="ERROR")
+            
+            if end_date_str:
+                try:
+                    end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+                    # Устанавливаем время на конец дня
+                    end_date = end_date.replace(hour=23, minute=59, second=59)
+                    save_log(f"Поиск с конечной датой: {end_date}")
+                except ValueError:
+                    save_log("Неверный формат даты окончания", level="ERROR")
             
             # Perform manual search
             try:
-                if settings.vk_token and settings.vk_communities:
-                    # VK search
-                    vk_communities = settings.vk_communities.split(',')
-                    for community_id in vk_communities:
-                        search_vk(active_project.id, community_id, [k.keyword for k in keywords])
+                vk_count = 0
+                ok_count = 0
+                
+                if settings.vk_token:
+                    if settings.vk_communities and settings.vk_communities.strip():
+                        # VK search по конкретным сообществам
+                        vk_communities = settings.vk_communities.split(',')
+                        for community_id in vk_communities:
+                            if community_id.strip():
+                                vk_count += search_vk(active_project.id, community_id.strip(), 
+                                                 [k.keyword for k in keywords], start_date, end_date)
+                    else:
+                        # VK search по всему ВКонтакте
+                        vk_count += search_vk(active_project.id, "", [k.keyword for k in keywords], 
+                                         start_date, end_date)
                 
                 if settings.ok_token and settings.ok_communities:
                     # OK search
                     ok_communities = settings.ok_communities.split(',')
                     for community_id in ok_communities:
-                        search_ok(active_project.id, community_id, [k.keyword for k in keywords])
+                        if community_id.strip():
+                            ok_count += search_ok(active_project.id, community_id.strip(), 
+                                             [k.keyword for k in keywords], start_date, end_date)
                 
-                flash('Manual search completed successfully!', 'success')
-                save_log(f"Performed manual search for project {active_project.name}")
+                flash(f'Поиск завершен! Найдено новых упоминаний: ВКонтакте - {vk_count}, Одноклассники - {ok_count}', 'success')
+                save_log(f"Ручной поиск завершен для проекта {active_project.name}. Найдено: ВК - {vk_count}, OK - {ok_count}")
             except Exception as e:
                 flash(f'Error during search: {str(e)}', 'danger')
                 save_log(f"Error during manual search: {str(e)}", level="ERROR")

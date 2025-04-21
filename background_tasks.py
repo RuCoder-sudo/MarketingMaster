@@ -88,26 +88,38 @@ class BackgroundSearcher:
                     keyword_strings = [k.keyword for k in keywords]
                     
                     # Search VK
-                    if settings.vk_token and settings.vk_communities:
-                        vk_communities = settings.vk_communities.split(',')
-                        for community_id in vk_communities:
+                    if settings.vk_token:
+                        # Поиск по сообществам, если они указаны
+                        if settings.vk_communities and settings.vk_communities.strip():
+                            vk_communities = settings.vk_communities.split(',')
+                            for community_id in vk_communities:
+                                if community_id.strip():
+                                    try:
+                                        save_log(f"Поиск в сообществе ВК {community_id}")
+                                        search_vk(project_id, community_id.strip(), keyword_strings)
+                                    except Exception as e:
+                                        save_log(f"Ошибка поиска в сообществе ВК {community_id}: {str(e)}", 
+                                                level="ERROR")
+                        else:
+                            # Поиск по всему ВКонтакте
                             try:
-                                save_log(f"Searching VK community {community_id}")
-                                search_vk(project_id, community_id, keyword_strings)
+                                save_log(f"Поиск по всему ВКонтакте")
+                                search_vk(project_id, "", keyword_strings)
                             except Exception as e:
-                                save_log(f"Error searching VK community {community_id}: {str(e)}", 
+                                save_log(f"Ошибка поиска по всему ВКонтакте: {str(e)}", 
                                         level="ERROR")
                     
                     # Search OK
                     if settings.ok_token and settings.ok_communities:
                         ok_communities = settings.ok_communities.split(',')
                         for community_id in ok_communities:
-                            try:
-                                save_log(f"Searching OK community {community_id}")
-                                search_ok(project_id, community_id, keyword_strings)
-                            except Exception as e:
-                                save_log(f"Error searching OK community {community_id}: {str(e)}", 
-                                        level="ERROR")
+                            if community_id.strip():
+                                try:
+                                    save_log(f"Поиск в сообществе Одноклассники {community_id}")
+                                    search_ok(project_id, community_id.strip(), keyword_strings)
+                                except Exception as e:
+                                    save_log(f"Ошибка поиска в сообществе Одноклассники {community_id}: {str(e)}", 
+                                            level="ERROR")
                     
                     # Wait for next iteration
                     save_log(f"Background search completed, next run in {self.interval} seconds")

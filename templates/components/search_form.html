@@ -1,4 +1,4 @@
-<!-- Search Form Component for filtering mentions -->
+<!-- Форма фильтрации для просмотра результатов -->
 <form id="filter-form" method="get" action="{{ url_for('search') }}" class="mb-4 search-controls">
     <div class="row">
         <div class="col-md-6 mb-2">
@@ -25,21 +25,30 @@
     </div>
 </form>
 
-<!-- Фильтры по дате - добавлены в основную форму -->
-<div class="row mt-3">
-    <div class="col-md-6 mb-2">
-        <div class="input-group">
-            <span class="input-group-text">Дата от</span>
-            <input type="date" class="form-control" name="date_from" value="{{ date_from or '' }}">
+<!-- Форма ручного поиска с датами -->
+<form id="manual-search-form" method="post" action="{{ url_for('search') }}" class="mb-4">
+    <input type="hidden" name="action" value="manual_search">
+    <h5 class="mb-3"><i class="fas fa-calendar-alt me-2 text-primary"></i> Параметры поиска</h5>
+    <div class="row">
+        <div class="col-md-6 mb-2">
+            <div class="input-group">
+                <span class="input-group-text">Дата от</span>
+                <input type="date" class="form-control" name="date_from" value="{{ date_from or '' }}">
+            </div>
+        </div>
+        <div class="col-md-6 mb-2">
+            <div class="input-group">
+                <span class="input-group-text">Дата до</span>
+                <input type="date" class="form-control" name="date_to" value="{{ date_to or '' }}">
+            </div>
         </div>
     </div>
-    <div class="col-md-6 mb-2">
-        <div class="input-group">
-            <span class="input-group-text">Дата до</span>
-            <input type="date" class="form-control" name="date_to" value="{{ date_to or '' }}">
-        </div>
+    <div class="text-center">
+        <button type="submit" class="btn btn-success">
+            <i class="fas fa-search me-2"></i> Запустить поиск с этими параметрами
+        </button>
     </div>
-</div>
+</form>
 
 <!-- Optional advanced filters - can be shown/hidden with JavaScript -->
 <div class="collapse" id="advancedFilters">
