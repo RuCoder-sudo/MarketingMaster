@@ -100,9 +100,17 @@
                     
                     <form method="post" action="{{ url_for('search') }}">
                         <input type="hidden" name="action" value="export_csv">
-                        <button type="submit" class="btn btn-info w-100">
-                            <i class="fas fa-file-export me-2"></i>
+                        <button type="submit" class="btn btn-info w-100 mb-2">
+                            <i class="fas fa-file-csv me-2"></i>
                             Экспорт в CSV
+                        </button>
+                    </form>
+                    
+                    <form method="post" action="{{ url_for('search') }}">
+                        <input type="hidden" name="action" value="export_excel">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-file-excel me-2"></i>
+                            Экспорт в Excel
                         </button>
                     </form>
                 </div>

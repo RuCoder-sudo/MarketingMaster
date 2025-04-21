@@ -1,59 +1,102 @@
-<!-- Форма фильтрации для просмотра результатов -->
-<form id="filter-form" method="get" action="{{ url_for('search') }}" class="mb-4 search-controls">
-    <div class="row">
-        <div class="col-md-6 mb-2">
-            <div class="input-group">
-                <span class="input-group-text">Фильтр по слову</span>
-                <input type="text" class="form-control" name="keyword" value="{{ keyword_filter or '' }}" placeholder="Введите слово">
-            </div>
-        </div>
-        <div class="col-md-4 mb-2">
-            <div class="input-group">
-                <span class="input-group-text">Соцсеть</span>
-                <select class="form-select" name="social_network">
-                    <option value="" {% if not social_network_filter %}selected{% endif %}>Все</option>
-                    <option value="vk" {% if social_network_filter == 'vk' %}selected{% endif %}>ВКонтакте</option>
-                    <option value="ok" {% if social_network_filter == 'ok' %}selected{% endif %}>Одноклассники</option>
-                </select>
-            </div>
-        </div>
-        <div class="col-md-2 mb-2">
-            <button type="submit" class="btn btn-primary w-100">
-                <i class="fas fa-filter"></i>
-            </button>
-        </div>
-    </div>
-</form>
+<!-- Кнопка для показа/скрытия всех фильтров -->
+<div class="text-center mb-4">
+    <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#allFilters">
+        <i class="fas fa-search me-1"></i> Расширенный поиск
+    </button>
+</div>
 
-<!-- Форма ручного поиска с датами -->
-<form id="manual-search-form" method="post" action="{{ url_for('search') }}" class="mb-4">
-    <input type="hidden" name="action" value="manual_search">
-    <h5 class="mb-3"><i class="fas fa-calendar-alt me-2 text-primary"></i> Параметры поиска</h5>
-    <div class="row">
-        <div class="col-md-6 mb-2">
-            <div class="input-group">
-                <span class="input-group-text">Дата от</span>
-                <input type="date" class="form-control" name="date_from" value="{{ date_from or '' }}">
-            </div>
-        </div>
-        <div class="col-md-6 mb-2">
-            <div class="input-group">
-                <span class="input-group-text">Дата до</span>
-                <input type="date" class="form-control" name="date_to" value="{{ date_to or '' }}">
-            </div>
-        </div>
-    </div>
-    <div class="text-center">
-        <button type="submit" class="btn btn-success">
-            <i class="fas fa-search me-2"></i> Запустить поиск с этими параметрами
-        </button>
-    </div>
-</form>
-
-<!-- Optional advanced filters - can be shown/hidden with JavaScript -->
-<div class="collapse" id="advancedFilters">
-    <div class="card card-body mb-4">
+<div class="collapse" id="allFilters">
+    <!-- Форма фильтрации для просмотра результатов -->
+    <form id="filter-form" method="get" action="{{ url_for('search') }}" class="mb-4 search-controls border p-3 rounded">
+        <h5 class="mb-3"><i class="fas fa-filter me-2 text-info"></i> Фильтр результатов</h5>
         <div class="row">
+            <div class="col-md-6 mb-2">
+                <div class="input-group">
+                    <span class="input-group-text">Фильтр по слову</span>
+                    <input type="text" class="form-control" name="keyword" value="{{ keyword_filter or '' }}" placeholder="Введите слово">
+                </div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <div class="input-group">
+                    <span class="input-group-text">Соцсеть</span>
+                    <select class="form-select" name="social_network">
+                        <option value="" {% if not social_network_filter %}selected{% endif %}>Все</option>
+                        <option value="vk" {% if social_network_filter == 'vk' %}selected{% endif %}>ВКонтакте</option>
+                        <option value="ok" {% if social_network_filter == 'ok' %}selected{% endif %}>Одноклассники</option>
+                        <option value="telegram" {% if social_network_filter == 'telegram' %}selected{% endif %}>Telegram</option>
+                        <option value="instagram" {% if social_network_filter == 'instagram' %}selected{% endif %}>Instagram</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2 mb-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Форма ручного поиска с датами -->
+    <form id="manual-search-form" method="post" action="{{ url_for('search') }}" class="mb-4 border p-3 rounded">
+        <input type="hidden" name="action" value="manual_search">
+        <h5 class="mb-3"><i class="fas fa-calendar-alt me-2 text-primary"></i> Параметры поиска</h5>
+        
+        <!-- Выбор соцсетей для поиска -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <label class="form-label">Выберите социальные сети для поиска:</label>
+                <div class="d-flex gap-2 flex-wrap">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="search_vk" id="search_vk" checked>
+                        <label class="form-check-label" for="search_vk">
+                            <i class="fab fa-vk text-primary"></i> ВКонтакте
+                        </label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="search_ok" id="search_ok" checked>
+                        <label class="form-check-label" for="search_ok">
+                            <i class="fab fa-odnoklassniki text-warning"></i> Одноклассники
+                        </label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="search_telegram" id="search_telegram" checked>
+                        <label class="form-check-label" for="search_telegram">
+                            <i class="fab fa-telegram text-info"></i> Telegram
+                        </label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="search_instagram" id="search_instagram" checked>
+                        <label class="form-check-label" for="search_instagram">
+                            <i class="fab fa-instagram text-danger"></i> Instagram
+                        </label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="search_all" id="search_all" checked>
+                        <label class="form-check-label" for="search_all">
+                            <i class="fas fa-check-circle text-success"></i> Все сети
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-2">
+                <div class="input-group">
+                    <span class="input-group-text">Дата от</span>
+                    <input type="date" class="form-control" name="date_from" value="{{ date_from or '' }}">
+                </div>
+            </div>
+            <div class="col-md-6 mb-2">
+                <div class="input-group">
+                    <span class="input-group-text">Дата до</span>
+                    <input type="date" class="form-control" name="date_to" value="{{ date_to or '' }}">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Advanced filters -->
+        <div class="row mt-3">
             <div class="col-md-6 mb-2">
                 <div class="input-group">
                     <span class="input-group-text">Автор</span>
@@ -67,11 +110,51 @@
                 </div>
             </div>
         </div>
-    </div>
+        
+        <div class="text-center mt-3">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-search me-2"></i> Запустить поиск с этими параметрами
+            </button>
+        </div>
+    </form>
 </div>
 
-<div class="text-center mb-4">
-    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters">
-        <i class="fas fa-cog me-1 text-purple"></i> Расширенный поиск
-    </button>
-</div>
+<!-- JavaScript для выбора всех социальных сетей -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Выбрать или снять выбор со всех соцсетей
+    const allCheckbox = document.getElementById('search_all');
+    const networkCheckboxes = [
+        document.getElementById('search_vk'),
+        document.getElementById('search_ok'),
+        document.getElementById('search_telegram'),
+        document.getElementById('search_instagram')
+    ];
+    
+    if (allCheckbox) {
+        allCheckbox.addEventListener('change', function() {
+            networkCheckboxes.forEach(checkbox => {
+                if (checkbox) checkbox.checked = allCheckbox.checked;
+            });
+        });
+    }
+    
+    // При клике на отдельную соцсеть проверять, все ли выбраны
+    networkCheckboxes.forEach(checkbox => {
+        if (checkbox) {
+            checkbox.addEventListener('change', function() {
+                const allSelected = networkCheckboxes.every(cb => cb && cb.checked);
+                if (allCheckbox) allCheckbox.checked = allSelected;
+            });
+        }
+    });
+    
+    // Если установлен фильтр, показать панель расширенного поиска
+    if ("{{ keyword_filter }}" || "{{ social_network_filter }}") {
+        const allFilters = document.getElementById('allFilters');
+        if (allFilters) {
+            const bsCollapse = new bootstrap.Collapse(allFilters, {toggle: true});
+        }
+    }
+});
+</script>
