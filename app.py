@@ -25,7 +25,11 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # Configure database
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///social_monitoring.db")
+database_url = os.environ.get("DATABASE_URL")
+# Если переменная DATABASE_URL существует, но пуста, используем значение по умолчанию
+if not database_url:
+    database_url = "sqlite:///social_monitoring.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
