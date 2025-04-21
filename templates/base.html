@@ -147,6 +147,72 @@
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
     
+    <!-- Inline Theme Switcher (для обхода проблем с кешированием) -->
+    <script>
+        // Немедленное выполнение скрипта для переключения темы
+        (function() {
+            console.log("Inline theme switcher executing");
+            
+            // Получаем кнопку переключения темы
+            var themeBtn = document.getElementById('theme-toggle');
+            if (!themeBtn) {
+                console.error("Theme button not found in inline script");
+                return;
+            }
+            
+            // Устанавливаем обработчик события
+            themeBtn.onclick = function() {
+                console.log("Theme button clicked (inline)");
+                
+                // Получаем текущую тему из body или устанавливаем светлую по умолчанию
+                var body = document.body;
+                var isDark = body.classList.contains('theme-dark');
+                
+                // Переключаем тему
+                if (isDark) {
+                    body.classList.remove('theme-dark');
+                    body.classList.add('theme-light');
+                    themeBtn.querySelector('i').className = 'fas fa-sun';
+                    console.log("Switched to light theme");
+                } else {
+                    body.classList.remove('theme-light');
+                    body.classList.add('theme-dark');
+                    themeBtn.querySelector('i').className = 'fas fa-moon';
+                    console.log("Switched to dark theme");
+                }
+                
+                // Сохраняем выбор в localStorage
+                localStorage.setItem('theme', isDark ? 'light' : 'dark');
+                
+                // Добавляем эффект нажатия
+                themeBtn.classList.add('theme-toggled');
+                setTimeout(function() {
+                    themeBtn.classList.remove('theme-toggled');
+                }, 500);
+                
+                return false; // Предотвращаем стандартное поведение кнопки
+            };
+            
+            // Устанавливаем начальную тему из localStorage
+            var savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                if (savedTheme === 'dark') {
+                    document.body.classList.add('theme-dark');
+                    themeBtn.querySelector('i').className = 'fas fa-moon';
+                } else {
+                    document.body.classList.add('theme-light');
+                    themeBtn.querySelector('i').className = 'fas fa-sun';
+                }
+            } else {
+                // По умолчанию светлая тема
+                document.body.classList.add('theme-light');
+                themeBtn.querySelector('i').className = 'fas fa-sun';
+            }
+            
+            console.log("Inline theme switcher initialized with theme:", savedTheme || 'light (default)');
+        })();
+    </script>
+    
     {% block extra_js %}{% endblock %}
     
     <!-- Индикатор загрузки -->

@@ -14,12 +14,19 @@
     font-size: 1.5rem;
     margin-bottom: 15px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 100;
 }
 
 .theme-toggle:hover {
     background-color: rgba(255, 255, 255, 0.3);
     transform: rotate(15deg);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.theme-toggle:active, .theme-toggle:focus {
+    outline: none;
+    transform: scale(0.95);
 }
 
 .theme-toggled {
@@ -30,6 +37,86 @@
     0% { transform: scale(1); }
     50% { transform: scale(1.2); }
     100% { transform: scale(1); }
+}
+
+/* Добавим глобальные классы для тем */
+body.theme-light {
+    background-color: #ffffff;
+    color: #212529;
+}
+
+body.theme-dark {
+    background-color: #212529;
+    color: #f8f9fa;
+}
+
+/* Стили для светлой темы */
+body.theme-light .navbar.bg-dark {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+}
+
+body.theme-light .navbar-dark .navbar-nav .nav-link {
+    color: #212529 !important;
+}
+
+body.theme-light .navbar-dark .navbar-nav .nav-link.active {
+    color: #0d6efd !important;
+}
+
+body.theme-light .navbar-dark .navbar-brand {
+    color: #212529 !important;
+}
+
+body.theme-light .bg-dark {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+}
+
+body.theme-light footer.bg-dark {
+    border-top: 1px solid #dee2e6;
+    background-color: #f8f9fa !important;
+}
+
+body.theme-light footer.bg-dark .text-light {
+    color: #212529 !important;
+}
+
+body.theme-light footer.bg-dark .text-muted {
+    color: #6c757d !important;
+}
+
+body.theme-light .btn-outline-light {
+    color: #212529 !important;
+    border-color: #212529 !important;
+}
+
+body.theme-light .dropdown-menu {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+}
+
+body.theme-light .theme-toggle {
+    color: #ffc107 !important;
+    background-color: rgba(33, 37, 41, 0.2) !important;
+    border-color: rgba(33, 37, 41, 0.3) !important;
+}
+
+/* Стили для темной темы */
+body.theme-dark .navbar.bg-dark {
+    background-color: #212529 !important;
+    color: #f8f9fa !important;
+}
+
+body.theme-dark .theme-toggle {
+    color: #f8f9fa !important;
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Класс, который добавляется при смене темы для эффекта анимации */
+.theme-transition * {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
 }
 
 [data-bs-theme="dark"] .theme-toggle {
