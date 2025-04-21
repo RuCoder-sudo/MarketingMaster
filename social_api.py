@@ -2,6 +2,7 @@ import requests
 import logging
 import hashlib
 import time
+import json
 from datetime import datetime
 from flask import current_app
 from models import Mention, Settings, Keyword, db
@@ -285,4 +286,148 @@ def search_ok(project_id, community_id, keywords, start_date=None, end_date=None
     
     except Exception as e:
         save_log(f"Error during OK search: {str(e)}", level="ERROR")
+        raise
+        
+def search_telegram(project_id, keywords, start_date=None, end_date=None):
+    """
+    Search for mentions in Telegram channels/groups
+    
+    Args:
+        project_id (int): Project ID
+        keywords (list): List of keywords to search for
+        start_date (datetime): Start date for search
+        end_date (datetime): End date for search
+    """
+    # Get Telegram API credentials
+    settings = Settings.query.filter_by(project_id=project_id).first()
+    if not settings or not settings.telegram_token:
+        save_log(f"Telegram API token not found for project {project_id}", level="ERROR")
+        raise ValueError("Telegram API token not found")
+    
+    # Check if there are channels to monitor
+    if not settings.telegram_channels:
+        save_log(f"No Telegram channels configured for project {project_id}", level="WARNING")
+        return 0
+    
+    try:
+        telegram_token = settings.telegram_token
+        found_count = 0
+        
+        # Get channels list (comma-separated)
+        channels = [c.strip() for c in settings.telegram_channels.split(",") if c.strip()]
+        
+        save_log(f"Searching Telegram channels: {', '.join(channels)} for keywords: {', '.join(keywords)}", level="INFO")
+        
+        # For each channel
+        for channel in channels:
+            # Remove @ if present
+            if channel.startswith('@'):
+                channel = channel[1:]
+            
+            # Base URL for Telegram Bot API
+            api_base = f"https://api.telegram.org/bot{telegram_token}"
+            
+            try:
+                # 1. Get chat info
+                response = requests.get(f"{api_base}/getChat", params={"chat_id": f"@{channel}"})
+                data = response.json()
+                
+                if not data.get("ok"):
+                    save_log(f"Error getting Telegram channel info for {channel}: {data.get('description', 'Unknown error')}", level="ERROR")
+                    continue
+                
+                chat = data.get("result", {})
+                chat_id = chat.get("id")
+                chat_title = chat.get("title", channel)
+                
+                save_log(f"Found Telegram channel: {chat_title} (ID: {chat_id})", level="INFO")
+                
+                # 2. Get messages from the channel
+                # Note: This is a simplified approach. Telegram Bot API has limitations on
+                # retrieving messages from channels/groups. In a production environment,
+                # you might need to use the Telegram API (not Bot API) or a Telegram client library.
+                
+                # Using getUpdates as a simple way to get recent messages
+                # This will only work for new messages after the bot is added to the channel
+                response = requests.get(f"{api_base}/getUpdates")
+                updates = response.json()
+                
+                if not updates.get("ok"):
+                    save_log(f"Error getting Telegram updates: {updates.get('description', 'Unknown error')}", level="ERROR")
+                    continue
+                
+                # Process all updates (messages)
+                for update in updates.get("result", []):
+                    # Check if this is a channel post
+                    if "channel_post" not in update:
+                        continue
+                    
+                    message = update["channel_post"]
+                    message_chat_id = message.get("chat", {}).get("id")
+                    
+                    # Skip if not from our target channel
+                    if message_chat_id != chat_id:
+                        continue
+                    
+                    # Skip if no text
+                    text = message.get("text", "")
+                    if not text:
+                        continue
+                    
+                    # Get message date
+                    message_date = datetime.fromtimestamp(message.get("date", int(time.time())))
+                    
+                    # Skip if outside date range
+                    if start_date and message_date < start_date:
+                        continue
+                    if end_date and message_date > end_date:
+                        continue
+                    
+                    # Check if message contains any of the keywords
+                    for keyword in keywords:
+                        if keyword.lower() in text.lower():
+                            # Check if this message is already in the database
+                            message_id = message.get("message_id", "")
+                            
+                            existing = Mention.query.filter_by(
+                                project_id=project_id,
+                                social_network="telegram",
+                                chat_id=str(chat_id),
+                                message_id=str(message_id)
+                            ).first()
+                            
+                            if not existing:
+                                # Create a new mention
+                                mention = Mention(
+                                    project_id=project_id,
+                                    social_network="telegram",
+                                    content=text,
+                                    post_url=f"https://t.me/{channel}/{message_id}" if message_id else f"https://t.me/{channel}",
+                                    post_date=message_date,
+                                    channel_name=chat_title,
+                                    chat_id=str(chat_id),
+                                    message_id=str(message_id)
+                                )
+                                
+                                db.session.add(mention)
+                                found_count += 1
+                            
+                            break  # No need to check other keywords for this message
+            
+            except Exception as e:
+                save_log(f"Error processing Telegram channel {channel}: {str(e)}", level="ERROR")
+                # Continue with other channels
+        
+        # Commit all new mentions
+        if found_count > 0:
+            db.session.commit()
+            save_log(f"Found {found_count} new mentions in Telegram channels", level="INFO")
+        else:
+            save_log(f"No new mentions found in Telegram channels", level="INFO")
+        
+        return found_count
+    
+    except Exception as e:
+        db.session.rollback()
+        save_log(f"Error during Telegram search: {str(e)}", level="ERROR")
         raise

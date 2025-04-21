@@ -19,15 +19,25 @@ class Settings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
     
-    # API Tokens
+    # API Tokens для всех соцсетей
     vk_token = db.Column(db.String(255))
     ok_token = db.Column(db.String(255))
     ok_public_key = db.Column(db.String(255))
     ok_private_key = db.Column(db.String(255))
+    telegram_token = db.Column(db.String(255))  # Токен Telegram Bot API
+    instagram_token = db.Column(db.String(255))  # Токен Instagram API
     
     # Communities to monitor
     vk_communities = db.Column(db.Text)  # Comma-separated community IDs
     ok_communities = db.Column(db.Text)  # Comma-separated community IDs
+    telegram_channels = db.Column(db.Text)  # Comma-separated channel names/usernames
+    instagram_accounts = db.Column(db.Text)  # Comma-separated account names
+    
+    # Notification settings
+    enable_email_notifications = db.Column(db.Boolean, default=False)
+    notification_email = db.Column(db.String(100))
+    enable_telegram_notifications = db.Column(db.Boolean, default=False)
+    notification_telegram_chat_id = db.Column(db.String(100))
     
     # Search settings
     search_interval = db.Column(db.Integer, default=3600)  # Seconds between automatic searches
@@ -50,7 +60,7 @@ class Mention(db.Model):
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
     
     # Source information
-    social_network = db.Column(db.String(20), nullable=False)  # 'vk' or 'ok'
+    social_network = db.Column(db.String(20), nullable=False)  # 'vk', 'ok', 'telegram', 'instagram'
     
     # Content information
     content = db.Column(db.Text, nullable=False)
@@ -60,6 +70,14 @@ class Mention(db.Model):
     # Author information
     author_id = db.Column(db.String(50))
     author_name = db.Column(db.String(100))
+    
+    # Дополнительные метаданные для разных соцсетей
+    channel_name = db.Column(db.String(100))  # Для Telegram: название канала
+    chat_id = db.Column(db.String(50))        # Для Telegram: ID чата или канала
+    message_id = db.Column(db.String(50))     # Для Telegram/Instagram: ID сообщения
+    
+    # Анализ тональности
+    sentiment = db.Column(db.String(10))      # 'positive', 'negative', 'neutral'
     
     # Metadata
     found_date = db.Column(db.DateTime, default=datetime.utcnow)
