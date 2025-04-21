@@ -1,0 +1,138 @@
+/* Светлая тема */
+body {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+}
+
+.navbar.bg-dark {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: #212529 !important;
+}
+
+.navbar-dark .navbar-nav .nav-link.active {
+    color: #0d6efd !important;
+}
+
+.navbar-dark .navbar-brand {
+    color: #212529 !important;
+}
+
+.bg-dark {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+}
+
+footer.bg-dark {
+    border-top: 1px solid #dee2e6 !important;
+    background-color: #f8f9fa !important;
+}
+
+footer.bg-dark .text-light {
+    color: #212529 !important;
+}
+
+footer.bg-dark .text-muted {
+    color: #6c757d !important;
+}
+
+.btn-outline-light {
+    color: #212529 !important;
+    border-color: #212529 !important;
+}
+
+.dropdown-menu {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+}
+
+.card {
+    background-color: #ffffff !important;
+    border-color: #dee2e6 !important;
+}
+
+.table {
+    color: #212529 !important;
+}
+
+.alert-info {
+    background-color: #cff4fc !important;
+    color: #055160 !important;
+}
+
+.alert-warning {
+    background-color: #fff3cd !important;
+    color: #664d03 !important;
+}
+
+.alert-danger {
+    background-color: #f8d7da !important;
+    color: #842029 !important;
+}
+
+.alert-success {
+    background-color: #d1e7dd !important;
+    color: #0f5132 !important;
+}
+
+.dropdown-item:hover {
+    background-color: #e9ecef !important;
+}
+
+.theme-toggle {
+    background-color: rgba(33, 37, 41, 0.2) !important;
+    border-color: rgba(33, 37, 41, 0.3) !important;
+}
+
+/* Дополнительные стили для форм в светлой теме */
+.form-control {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+    border-color: #ced4da !important;
+}
+
+.form-control:focus {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+}
+
+.form-select {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+    border-color: #ced4da !important;
+}
+
+/* Исправления для таблиц */
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    color: #212529 !important;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.075) !important;
+    color: #212529 !important;
+}
+
+/* Фиксы для модальных окон */
+.modal-content {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+}
+
+.modal-header, .modal-footer {
+    background-color: #f8f9fa !important;
+}
+
+/* Исправления для панелей навигации */
+.nav-tabs .nav-link {
+    color: #495057 !important;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #ffffff !important;
+    color: #0d6efd !important;
+    border-color: #dee2e6 #dee2e6 #ffffff !important;
+}
