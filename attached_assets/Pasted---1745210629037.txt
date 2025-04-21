@@ -1,0 +1,132 @@
+    ┌──────────────────────────────────────────────────────────────────────┐
+    │                 • MobaXterm Personal Edition v25.0 •                 │
+    │               (SSH client, X server and network tools)               │
+    │                                                                      │
+    │ ⮞ SSH session to root@f418b3c5b5c3.vps.myjino.ru                     │
+    │   • Direct SSH      :  ✓                                             │
+    │   • SSH compression :  ✓                                             │
+    │   • SSH-browser     :  ✓                                             │
+    │   • X11-forwarding  :  ✗  (disabled or not supported by server)      │
+    │                                                                      │
+    │ ⮞ For more info, ctrl+click on help or visit our website.            │
+    └──────────────────────────────────────────────────────────────────────┘
+
+Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.2.0 x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+Last login: Mon Apr 21 07:04:43 2025 from 109.252.119.183
+root@f418b3c5b5c3:~# cat /root/.env
+DATABASE_URL=postgresql://social_user:lizeR3056806@localhost:5432/social_monitor
+SECRET_KEY=3d6f45a5fc12445dbac2f59c3b6c7cb1
+root@f418b3c5b5c3:~# nano /root/.env
+root@f418b3c5b5c3:~# sudo -u postgres psql -c "\l" | grep social_monitoring
+could not change directory to "/root": Permission denied
+ social_monitoring | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =Tc/postgres
+root@f418b3c5b5c3:~# cd /root/social_monitoring
+source venv/bin/activate
+(venv) root@f418b3c5b5c3:~/social_monitoring# nano init_db.py
+(venv) root@f418b3c5b5c3:~/social_monitoring# nano init_db.py
+(venv) root@f418b3c5b5c3:~/social_monitoring# python init_db.py
+Traceback (most recent call last):
+  File "/root/social_monitoring/venv/lib/python3.10/site-packages/sqlalchemy/engine/base.py", line 1964, in _exec_single_context
+    self.dialect.do_execute(
+  File "/root/social_monitoring/venv/lib/python3.10/site-packages/sqlalchemy/engine/default.py", line 945, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.InsufficientPrivilege: permission denied for table project
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/social_monitoring/init_db.py", line 1, in <module>
+    from app import app, db
+  File "/root/social_monitoring/app.py", line 689, in <module>
+    if Project.query.count() == 0:
+  File "/root/social_monitoring/venv/lib/python3.10/site-packages/sqlalchemy/orm/query.py", line 3147, in count
+    self._legacy_from_self(col).enable_eagerloads(False).scalar()
+  File "/root/social_monitoring/venv/lib/python3.10/site-packages/sqlalchemy/orm/query.py", line 2836, in scalar
+    ret = self.one()
+  File "/root/social_monitoring/venv/lib/python3.10/site-packages/sqlalchemy/orm/query.py", line 2809, in one
+    return self._iter().one()  # type: ignore
+  File "/root/social_monitoring/venv/lib/python3.10/site-packages/sqlalchemy/orm/query.py", line 2858, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+  File "/root/social_monitoring/venv/lib/python3.10/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+  File "/root/social_monitoring/venv/lib/python3.10/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+  File "/root/social_monitoring/venv/lib/python3.10/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+  File "/root/social_monitoring/venv/lib/python3.10/site-packages/sqlalchemy/engine/base.py", line 1416, in execute
+    return meth(
+  File "/root/social_monitoring/venv/lib/python3.10/site-packages/sqlalchemy/sql/elements.py", line 523, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/root/social_monitoring/venv/lib/python3.10/site-packages/sqlalchemy/engine/base.py", line 1638, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/root/social_monitoring/venv/lib/python3.10/site-packages/sqlalchemy/engine/base.py", line 1843, in _execute_context
+    return self._exec_single_context(
+  File "/root/social_monitoring/venv/lib/python3.10/site-packages/sqlalchemy/engine/base.py", line 1983, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/root/social_monitoring/venv/lib/python3.10/site-packages/sqlalchemy/engine/base.py", line 2352, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/root/social_monitoring/venv/lib/python3.10/site-packages/sqlalchemy/engine/base.py", line 1964, in _exec_single_context
+    self.dialect.do_execute(
+  File "/root/social_monitoring/venv/lib/python3.10/site-packages/sqlalchemy/engine/default.py", line 945, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.InsufficientPrivilege) permission denied for table project
+
+[SQL: SELECT count(*) AS count_1
+FROM (SELECT project.id AS project_id, project.name AS project_name, project.created_at AS project_created_at
+FROM project) AS anon_1]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+(venv) root@f418b3c5b5c3:~/social_monitoring# nano /etc/nginx/sites-available/social_monitoring
+(venv) root@f418b3c5b5c3:~/social_monitoring# nginx -t
+systemctl restart nginx
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+(venv) root@f418b3c5b5c3:~/social_monitoring# nano /etc/systemd/system/social_monitoring.service
+(venv) root@f418b3c5b5c3:~/social_monitoring# systemctl daemon-reload
+systemctl restart social_monitoring
+(venv) root@f418b3c5b5c3:~/social_monitoring# systemctl status social_monitoring
+journalctl -u social_monitoring -f
+× social_monitoring.service - Social Monitoring Gunicorn Service
+     Loaded: loaded (/etc/systemd/system/social_monitoring.service; enabled; ven
+dor preset: enabled)
+     Active: failed (Result: exit-code) since Mon 2025-04-21 07:42:38
+ MSK; 8s ago
+    Process: 37285 ExecStart=/root/social_monitoring/venv/bin/gunicorn --workers
+ 3 --bind 127.0.0.1:5000 --reload main:app (code=exited, status=3)
+   Main PID: 37285 (code=exited, status=3)
+
+Apr 21 07:42:37 f418b3c5b5c3.vps.myjino.ru gunicorn[37288]: FROM project) AS ano
+n_1]
+Apr 21 07:42:37 f418b3c5b5c3.vps.myjino.ru gunicorn[37288]: (Background on this
+error at: https://sqlalche.me/e/20/f405)
+Apr 21 07:42:37 f418b3c5b5c3.vps.myjino.ru gunicorn[37288]: [2025-04-21 07:42:37
+ +0300] [37288] [INFO] Worker exiting (pid: 37288)
+Apr 21 07:42:38 f418b3c5b5c3.vps.myjino.ru gunicorn[37285]: [2025-04-21 07:42:38
+ +0300] [37285] [ERROR] Worker (pid:37286) exited with code 3
+Apr 21 07:42:38 f418b3c5b5c3.vps.myjino.ru gunicorn[37285]: [2025-04-21 07:42:38
+ +0300] [37285] [ERROR] Worker (pid:37287) was sent SIGTERM!
+Apr 21 07:42:38 f418b3c5b5c3.vps.myjino.ru gunicorn[37285]: [2025-04-21 07:42:38
+ +0300] [37285] [ERROR] Worker (pid:37288) was sent SIGTERM!
+Apr 21 07:42:38 f418b3c5b5c3.vps.myjino.ru gunicorn[37285]: [2025-04-21 07:42:38
+ +0300] [37285] [ERROR] Shutting down: Master
+Apr 21 07:42:38 f418b3c5b5c3.vps.myjino.ru gunicorn[37285]: [2025-04-21 07:42:38
+ +0300] [37285] [ERROR] Reason: Worker failed to boot.
+Apr 21 07:42:38 f418b3c5b5c3.vps.myjino.ru systemd[1]: s
+ocial_monitoring.service: Main process exited, code=exited, status=3/NOTIMPLEMEN
+TED
+Apr 21 07:42:38 f418b3c5b5c3.vps.myjino.ru systemd[1]:
+social_monitoring.service: Failed with result 'exit-code'.
+Apr 21 07:42:37 f418b3c5b5c3.vps.myjino.ru gunicorn[37288]: FROM project) AS anon_1]
+Apr 21 07:42:37 f418b3c5b5c3.vps.myjino.ru gunicorn[37288]: (Background on this error at: https://sqlalche.me/e/20/f405)
+Apr 21 07:42:37 f418b3c5b5c3.vps.myjino.ru gunicorn[37288]: [2025-04-21 07:42:37 +0300] [37288] [INFO] Worker exiting (pid: 37288)
+Apr 21 07:42:38 f418b3c5b5c3.vps.myjino.ru gunicorn[37285]: [2025-04-21 07:42:38 +0300] [37285] [ERROR] Worker (pid:37286) exited with code 3
+Apr 21 07:42:38 f418b3c5b5c3.vps.myjino.ru gunicorn[37285]: [2025-04-21 07:42:38 +0300] [37285] [ERROR] Worker (pid:37287) was sent SIGTERM!
+Apr 21 07:42:38 f418b3c5b5c3.vps.myjino.ru gunicorn[37285]: [2025-04-21 07:42:38 +0300] [37285] [ERROR] Worker (pid:37288) was sent SIGTERM!
+Apr 21 07:42:38 f418b3c5b5c3.vps.myjino.ru gunicorn[37285]: [2025-04-21 07:42:38 +0300] [37285] [ERROR] Shutting down: Master
+Apr 21 07:42:38 f418b3c5b5c3.vps.myjino.ru gunicorn[37285]: [2025-04-21 07:42:38 +0300] [37285] [ERROR] Reason: Worker failed to boot.
+Apr 21 07:42:38 f418b3c5b5c3.vps.myjino.ru systemd[1]: social_monitoring.service: Main process exited, code=exited, status=3/NOTIMPLEMENTED
+Apr 21 07:42:38 f418b3c5b5c3.vps.myjino.ru systemd[1]: social_monitoring.service: Failed with result 'exit-code'.
