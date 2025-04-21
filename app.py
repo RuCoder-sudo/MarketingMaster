@@ -340,7 +340,10 @@ def search():
             try:
                 vk_count = 0
                 ok_count = 0
+                telegram_count = 0
+                instagram_count = 0
                 
+                # ВКонтакте поиск
                 if settings.vk_token:
                     if settings.vk_communities and settings.vk_communities.strip():
                         # VK search по конкретным сообществам
@@ -354,6 +357,7 @@ def search():
                         vk_count += search_vk(active_project.id, "", [k.keyword for k in keywords], 
                                          start_date, end_date)
                 
+                # Одноклассники поиск
                 if settings.ok_token and settings.ok_communities:
                     # OK search
                     ok_communities = settings.ok_communities.split(',')
@@ -362,8 +366,32 @@ def search():
                             ok_count += search_ok(active_project.id, community_id.strip(), 
                                              [k.keyword for k in keywords], start_date, end_date)
                 
-                flash(f'Поиск завершен! Найдено новых упоминаний: ВКонтакте - {vk_count}, Одноклассники - {ok_count}', 'success')
-                save_log(f"Ручной поиск завершен для проекта {active_project.name}. Найдено: ВК - {vk_count}, OK - {ok_count}")
+                # Telegram поиск
+                if settings.telegram_token and settings.telegram_channels:
+                    # Telegram search
+                    telegram_count = search_telegram(active_project.id, [k.keyword for k in keywords], 
+                                               start_date, end_date)
+                
+                # Instagram поиск
+                if settings.instagram_token and settings.instagram_accounts:
+                    # Instagram search
+                    instagram_count = search_instagram(active_project.id, [k.keyword for k in keywords], 
+                                                 start_date, end_date)
+                
+                # Показываем результаты поиска
+                flash_message = 'Поиск завершен! Найдено новых упоминаний: '
+                flash_message += f'ВКонтакте - {vk_count}, ' if settings.vk_token else ''
+                flash_message += f'Одноклассники - {ok_count}, ' if settings.ok_token and settings.ok_communities else ''
+                flash_message += f'Telegram - {telegram_count}, ' if settings.telegram_token and settings.telegram_channels else ''
+                flash_message += f'Instagram - {instagram_count}' if settings.instagram_token and settings.instagram_accounts else ''
+                
+                # Удаляем последнюю запятую, если она есть
+                if flash_message.endswith(', '):
+                    flash_message = flash_message[:-2]
+                
+                flash(flash_message, 'success')
+                save_log(f"Ручной поиск завершен для проекта {active_project.name}. "
+                       f"Найдено: ВК - {vk_count}, OK - {ok_count}, Telegram - {telegram_count}, Instagram - {instagram_count}")
                 
                 # Передаем в шаблон флаг, чтобы скрыть индикатор загрузки
                 session['hide_loading'] = True

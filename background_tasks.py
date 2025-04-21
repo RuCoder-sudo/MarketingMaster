@@ -55,9 +55,10 @@ class BackgroundSearcher:
         Args:
             project_id (int): Project ID
         """
-        from social_api import search_vk, search_ok
-        from models import Settings, Keyword
+        from social_api import search_vk, search_ok, search_telegram, search_instagram
+        from models import Settings, Keyword, Mention
         from utils import save_log
+        from notifications import send_notifications
         import flask
         
         logging.info(f"Starting background search for project {project_id}")
@@ -120,6 +121,49 @@ class BackgroundSearcher:
                                 except Exception as e:
                                     save_log(f"Ошибка поиска в сообществе Одноклассники {community_id}: {str(e)}", 
                                             level="ERROR")
+                    
+                    # Search Telegram
+                    if settings.telegram_token and settings.telegram_channels:
+                        try:
+                            save_log(f"Поиск в каналах/группах Telegram")
+                            search_telegram(project_id, keyword_strings)
+                        except Exception as e:
+                            save_log(f"Ошибка поиска в Telegram: {str(e)}", level="ERROR")
+                    
+                    # Search Instagram
+                    if settings.instagram_token and settings.instagram_accounts:
+                        try:
+                            save_log(f"Поиск в аккаунтах Instagram")
+                            search_instagram(project_id, keyword_strings)
+                        except Exception as e:
+                            save_log(f"Ошибка поиска в Instagram: {str(e)}", level="ERROR")
+                    
+                    # Check if we need to send notifications for new mentions
+                    if settings.enable_email_notifications or settings.enable_telegram_notifications:
+                        try:
+                            # Get mentions found in the last minute (new mentions from this search)
+                            one_minute_ago = datetime.utcnow() - timedelta(minutes=1)
+                            new_mentions = Mention.query.filter(
+                                Mention.project_id == project_id,
+                                Mention.found_date >= one_minute_ago
+                            ).all()
+                            
+                            if new_mentions:
+                                save_log(f"Sending notifications for {len(new_mentions)} new mentions")
+                                notification_result = send_notifications(project_id, new_mentions)
+                                
+                                # Log notification results
+                                if notification_result["email"]:
+                                    save_log("Email notification sent successfully")
+                                elif settings.enable_email_notifications:
+                                    save_log("Failed to send email notification", level="WARNING")
+                                    
+                                if notification_result["telegram"]:
+                                    save_log("Telegram notification sent successfully")
+                                elif settings.enable_telegram_notifications:
+                                    save_log("Failed to send Telegram notification", level="WARNING")
+                        except Exception as e:
+                            save_log(f"Error sending notifications: {str(e)}", level="ERROR")
                     
                     # Wait for next iteration
                     save_log(f"Background search completed, next run in {self.interval} seconds")
