@@ -286,6 +286,9 @@ def search():
                 
                 flash(f'Поиск завершен! Найдено новых упоминаний: ВКонтакте - {vk_count}, Одноклассники - {ok_count}', 'success')
                 save_log(f"Ручной поиск завершен для проекта {active_project.name}. Найдено: ВК - {vk_count}, OK - {ok_count}")
+                
+                # Передаем в шаблон флаг, чтобы скрыть индикатор загрузки
+                session['hide_loading'] = True
             except Exception as e:
                 flash(f'Error during search: {str(e)}', 'danger')
                 save_log(f"Error during manual search: {str(e)}", level="ERROR")

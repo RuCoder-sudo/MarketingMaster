@@ -6,13 +6,16 @@
     <title>{% block title %}Мониторинг упоминаний в соцсетях{% endblock %}</title>
     
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet" id="bootstrap-theme">
     
     <!-- Font Awesome for icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <!-- DataTables CSS (for tables) -->
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    
+    <!-- Chart.js для визуализации данных -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
@@ -58,6 +61,11 @@
                         </a>
                     </li>
                 </ul>
+                
+                <!-- Переключатель темы -->
+                <button id="theme-toggle" class="theme-toggle me-2" aria-label="Переключить тему">
+                    <i class="fas fa-moon"></i>
+                </button>
                 
                 <!-- Project selector -->
                 <div class="dropdown ms-2">
@@ -138,5 +146,11 @@
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     
     {% block extra_js %}{% endblock %}
+    
+    <!-- Индикатор загрузки -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner-large"></div>
+        <p class="loading-text">Выполняется поиск...</p>
+    </div>
 </body>
 </html>

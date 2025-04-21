@@ -14,6 +14,54 @@ document.addEventListener('DOMContentLoaded', function() {
         return new bootstrap.Popover(popoverTriggerEl);
     });
     
+    // Управление темой (светлая/темная)
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+    const themeIcon = themeToggleBtn.querySelector('i');
+    
+    // Проверяем сохраненную тему из localStorage
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        htmlElement.setAttribute('data-bs-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+    }
+    
+    // Обработчик клика по кнопке переключения темы
+    themeToggleBtn.addEventListener('click', function() {
+        const currentTheme = htmlElement.getAttribute('data-bs-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        // Установка новой темы
+        htmlElement.setAttribute('data-bs-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        
+        // Обновление иконки
+        updateThemeIcon(newTheme);
+    });
+    
+    // Функция обновления иконки в зависимости от темы
+    function updateThemeIcon(theme) {
+        if (theme === 'dark') {
+            themeIcon.className = 'fas fa-moon';
+        } else {
+            themeIcon.className = 'fas fa-sun';
+        }
+    }
+    
+    // Показывать индикатор загрузки при поиске
+    const manualSearchForm = document.getElementById('manual-search-form');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    
+    if (manualSearchForm) {
+        manualSearchForm.addEventListener('submit', function() {
+            // Включаем индикатор загрузки
+            loadingOverlay.classList.add('active');
+            
+            // Возвращаем true, чтобы форма была отправлена
+            return true;
+        });
+    }
+    
     // Initialize DataTables if present
     if (typeof $.fn.DataTable !== 'undefined' && document.querySelector('.datatable')) {
         $('.datatable').DataTable({
@@ -121,6 +169,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('search-status')) {
         updateSearchStatus();
         setInterval(updateSearchStatus, 10000); // Update every 10 seconds
+    }
+    
+    // Проверяем нужно ли скрыть индикатор загрузки (после выполнения поиска)
+    // Этот код выполнится после редиректа со страницы поиска
+    if (document.referrer.includes('/search') && loadingOverlay) {
+        loadingOverlay.classList.remove('active');
     }
     
     // Project rename functionality

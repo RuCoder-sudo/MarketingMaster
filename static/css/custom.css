@@ -122,7 +122,7 @@
     border: 1px solid var(--bs-border-color);
 }
 
-/* Loading spinner */
+/* Loading spinner and overlay */
 .loading-spinner {
     display: inline-block;
     width: 1rem;
@@ -133,6 +133,92 @@
     animation: spinner-border .75s linear infinite;
 }
 
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.loading-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.loading-spinner-large {
+    display: inline-block;
+    width: 4rem;
+    height: 4rem;
+    border: 0.4em solid white;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spinner-border .75s linear infinite;
+    margin-bottom: 1rem;
+}
+
+.loading-text {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+}
+
 @keyframes spinner-border {
     to { transform: rotate(360deg); }
+}
+
+/* Theme switching */
+[data-bs-theme="light"] {
+    --bs-body-color: #333;
+    --bs-body-bg: #f8f9fa;
+    --bs-card-bg: #fff;
+    --bs-dark: #343a40;
+    --bs-border-color: #dee2e6;
+}
+
+[data-bs-theme="dark"] {
+    --bs-body-color: #e9ecef;
+    --bs-body-bg: #343a40;
+    --bs-card-bg: #212529;
+    --bs-dark: #212529;
+    --bs-border-color: #495057;
+}
+
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background-color: var(--bs-dark);
+    color: var(--bs-body-color);
+    border: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.theme-toggle:hover {
+    background-color: var(--bs-primary);
+    color: white;
+}
+
+/* New network badges */
+.badge-telegram {
+    background-color: #0088cc;
+    color: white;
+}
+
+.badge-instagram {
+    background-image: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    color: white;
 }
