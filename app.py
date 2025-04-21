@@ -63,6 +63,8 @@ def settings():
             ok_token = request.form.get('ok_token')
             ok_public_key = request.form.get('ok_public_key')
             ok_private_key = request.form.get('ok_private_key')
+            telegram_token = request.form.get('telegram_token')
+            instagram_token = request.form.get('instagram_token')
             
             # Update or create settings
             settings = Settings.query.filter_by(project_id=active_project.id).first()
@@ -70,14 +72,23 @@ def settings():
                 settings = Settings(project_id=active_project.id)
                 db.session.add(settings)
             
-            settings.vk_token = vk_token
-            settings.ok_token = ok_token
-            settings.ok_public_key = ok_public_key
-            settings.ok_private_key = ok_private_key
+            # Обновляем только те токены, которые пришли в запросе
+            if vk_token is not None:
+                settings.vk_token = vk_token
+            if ok_token is not None:
+                settings.ok_token = ok_token
+            if ok_public_key is not None:
+                settings.ok_public_key = ok_public_key
+            if ok_private_key is not None:
+                settings.ok_private_key = ok_private_key
+            if telegram_token is not None:
+                settings.telegram_token = telegram_token
+            if instagram_token is not None:
+                settings.instagram_token = instagram_token
             
             db.session.commit()
-            flash('API tokens saved successfully!', 'success')
-            save_log(f"API tokens updated for project {active_project.name}")
+            flash('API токены успешно сохранены!', 'success')
+            save_log(f"API токены обновлены для проекта {active_project.name}")
             
         elif action == 'add_community':
             # Add community to monitor
@@ -105,6 +116,30 @@ def settings():
                         settings.ok_communities = f"{settings.ok_communities},{community_id}"
                 else:
                     settings.ok_communities = community_id
+            elif social_network == 'telegram':
+                # Remove @ from the beginning if it's there
+                if community_id.startswith('@'):
+                    clean_id = community_id[1:]
+                else:
+                    clean_id = community_id
+                    
+                if settings.telegram_channels:
+                    if clean_id not in settings.telegram_channels.split(','):
+                        settings.telegram_channels = f"{settings.telegram_channels},{clean_id}"
+                else:
+                    settings.telegram_channels = clean_id
+            elif social_network == 'instagram':
+                # Remove @ from the beginning if it's there
+                if community_id.startswith('@'):
+                    clean_id = community_id[1:]
+                else:
+                    clean_id = community_id
+                    
+                if settings.instagram_accounts:
+                    if clean_id not in settings.instagram_accounts.split(','):
+                        settings.instagram_accounts = f"{settings.instagram_accounts},{clean_id}"
+                else:
+                    settings.instagram_accounts = clean_id
             
             db.session.commit()
             flash(f'Community ID {community_id} added to {social_network.upper()} monitoring!', 'success')
@@ -126,6 +161,16 @@ def settings():
                     if community_id in communities:
                         communities.remove(community_id)
                         settings.ok_communities = ','.join(communities)
+                elif social_network == 'telegram' and settings.telegram_channels:
+                    channels = settings.telegram_channels.split(',')
+                    if community_id in channels:
+                        channels.remove(community_id)
+                        settings.telegram_channels = ','.join(channels)
+                elif social_network == 'instagram' and settings.instagram_accounts:
+                    accounts = settings.instagram_accounts.split(',')
+                    if community_id in accounts:
+                        accounts.remove(community_id)
+                        settings.instagram_accounts = ','.join(accounts)
                 
                 db.session.commit()
                 flash(f'Community ID {community_id} removed from {social_network.upper()} monitoring!', 'success')
@@ -137,18 +182,26 @@ def settings():
     settings = Settings.query.filter_by(project_id=active_project.id).first()
     vk_communities = []
     ok_communities = []
+    telegram_channels = []
+    instagram_accounts = []
     
     if settings:
         if settings.vk_communities:
             vk_communities = settings.vk_communities.split(',')
         if settings.ok_communities:
             ok_communities = settings.ok_communities.split(',')
+        if settings.telegram_channels:
+            telegram_channels = settings.telegram_channels.split(',')
+        if settings.instagram_accounts:
+            instagram_accounts = settings.instagram_accounts.split(',')
     
     return render_template('settings.html', 
                           active_project=active_project,
                           settings=settings,
                           vk_communities=vk_communities,
-                          ok_communities=ok_communities)
+                          ok_communities=ok_communities,
+                          telegram_channels=telegram_channels,
+                          instagram_accounts=instagram_accounts)
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
