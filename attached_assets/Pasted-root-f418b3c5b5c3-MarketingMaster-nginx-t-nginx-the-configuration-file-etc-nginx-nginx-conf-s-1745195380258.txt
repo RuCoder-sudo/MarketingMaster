@@ -1,0 +1,180 @@
+root@f418b3c5b5c3:~/MarketingMaster# nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+root@f418b3c5b5c3:~/MarketingMaster# systemctl restart nginx
+root@f418b3c5b5c3:~/MarketingMaster# systemctl status socialmonitor
+● socialmonitor.service - Social Media Monitoring Flask App
+     Loaded: loaded (/etc/systemd/system/socialmonitor.service; enabled; vendor
+preset: enabled)
+     Active: active (running) since Mon 2025-04-21 03:28:12 MSK; 2s a
+go
+   Main PID: 6916 (gunicorn)
+     CGroup: /system.slice/socialmonitor.service
+             └─6916 /root/MarketingMaster/venv/bin/python3 /root/MarketingMaster/v
+env/bin/gunicorn --workers 3 --bind 0.0.0.0:5000 main:app
+
+Apr 21 03:28:12 f418b3c5b5c3.vps.myjino.ru systemd[1]: socialmonitor.service: Sc
+heduled restart job, restart counter is at 83.
+Apr 21 03:28:12 f418b3c5b5c3.vps.myjino.ru systemd[1]: Stopped Social Media Moni
+toring Flask App.
+Apr 21 03:28:12 f418b3c5b5c3.vps.myjino.ru systemd[1]: Started Social Media Moni
+toring Flask App.
+Apr 21 03:28:12 f418b3c5b5c3.vps.myjino.ru gunicorn[6916]: [2025-04-21 03:28:12
++0300] [6916] [INFO] Starting gunicorn 23.0.0
+Apr 21 03:28:12 f418b3c5b5c3.vps.myjino.ru gunicorn[6916]: [2025-04-21 03:28:12
++0300] [6916] [ERROR] Connection in use: ('0.0.0.0', 5000)
+Apr 21 03:28:12 f418b3c5b5c3.vps.myjino.ru gunicorn[6916]: [2025-04-21 03:28:12
++0300] [6916] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+
+...skipping 1 line
+Apr 21 03:28:13 f418b3c5b5c3.vps.myjino.ru gunicorn[6916]: [2025-04-21 03:28:13
++0300] [6916] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+Apr 21 03:28:14 f418b3c5b5c3.vps.myjino.ru gunicorn[6916]: [2025-04-21 03:28:14
++0300] [6916] [ERROR] Connection in use: ('0.0.0.0', 5000)
+Apr 21 03:28:14 f418b3c5b5c3.vps.myjino.ru gunicorn[6916]: [2025-04-21 03:28:14
++0300] [6916] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+root@f418b3c5b5c3:~/MarketingMaster# l start socialmonitor
+ls: cannot access 'start': No such file or directory
+ls: cannot access 'socialmonitor': No such file or directory
+root@f418b3c5b5c3:~/MarketingMaster# systemctl start socialmonitor
+root@f418b3c5b5c3:~/MarketingMaster# journalctl -u socialmonitor -n 50
+Apr 21 03:28:28 f418b3c5b5c3.vps.myjino.ru systemd[1]: s
+ocialmonitor.service: Main process exited, code=exited, status=1/FAILURE
+Apr 21 03:28:28 f418b3c5b5c3.vps.myjino.ru systemd[1]:
+socialmonitor.service: Failed with result 'exit-code'.
+Apr 21 03:28:28 f418b3c5b5c3.vps.myjino.ru systemd[1]: socialmonitor.service: Sc
+heduled restart job, restart counter is at 86.
+Apr 21 03:28:28 f418b3c5b5c3.vps.myjino.ru systemd[1]: Stopped Social Media Moni
+toring Flask App.
+Apr 21 03:28:28 f418b3c5b5c3.vps.myjino.ru systemd[1]: Started Social Media Moni
+toring Flask App.
+Apr 21 03:28:28 f418b3c5b5c3.vps.myjino.ru gunicorn[6923]: [2025-04-21 03:28:28
++0300] [6923] [INFO] Starting gunicorn 23.0.0
+Apr 21 03:28:28 f418b3c5b5c3.vps.myjino.ru gunicorn[6923]: [2025-04-21 03:28:28
++0300] [6923] [ERROR] Connection in use: ('0.0.0.0', 5000)
+Apr 21 03:28:28 f418b3c5b5c3.vps.myjino.ru gunicorn[6923]: [2025-04-21 03:28:28
++0300] [6923] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+Apr 21 03:28:29 f418b3c5b5c3.vps.myjino.ru gunicorn[6923]: [2025-04-21 03:28:29
++0300] [6923] [ERROR] Connection in use: ('0.0.0.0', 5000)
+Apr 21 03:28:29 f418b3c5b5c3.vps.myjino.ru gunicorn[6923]: [2025-04-21 03:28:29
++0300] [6923] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+Apr 21 03:28:30 f418b3c5b5c3.vps.myjino.ru gunicorn[6923]: [2025-04-21 03:28:30
++0300] [6923] [ERROR] Connection in use: ('0.0.0.0', 5000)
+Apr 21 03:28:30 f418b3c5b5c3.vps.myjino.ru gunicorn[6923]: [2025-04-21 03:28:30
++0300] [6923] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+Apr 21 03:28:31 f418b3c5b5c3.vps.myjino.ru gunicorn[6923]: [2025-04-21 03:28:31
++0300] [6923] [ERROR] Connection in use: ('0.0.0.0', 5000)
+Apr 21 03:28:31 f418b3c5b5c3.vps.myjino.ru gunicorn[6923]: [2025-04-21 03:28:31
++0300] [6923] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+Apr 21 03:28:32 f418b3c5b5c3.vps.myjino.ru gunicorn[6923]: [2025-04-21 03:28:32
++0300] [6923] [ERROR] Connection in use: ('0.0.0.0', 5000)
+Apr 21 03:28:32 f418b3c5b5c3.vps.myjino.ru gunicorn[6923]: [2025-04-21 03:28:32
++0300] [6923] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+Apr 21 03:28:33 f418b3c5b5c3.vps.myjino.ru gunicorn[6923]: [2025-04-21 03:28:33
++0300] [6923] [ERROR] Can't connect to ('0.0.0.0', 5000)
+Apr 21 03:28:33 f418b3c5b5c3.vps.myjino.ru systemd[1]: s
+ocialmonitor.service: Main process exited, code=exited, status=1/FAILURE
+Apr 21 03:28:33 f418b3c5b5c3.vps.myjino.ru systemd[1]:
+socialmonitor.service: Failed with result 'exit-code'.
+Apr 21 03:28:34 f418b3c5b5c3.vps.myjino.ru systemd[1]: socialmonitor.service: Sc
+heduled restart job, restart counter is at 87.
+Apr 21 03:28:34 f418b3c5b5c3.vps.myjino.ru systemd[1]: Stopped Social Media Moni
+toring Flask App.
+Apr 21 03:28:34 f418b3c5b5c3.vps.myjino.ru systemd[1]: Started Social Media Moni
+toring Flask App.
+Apr 21 03:28:34 f418b3c5b5c3.vps.myjino.ru gunicorn[6925]: [2025-04-21 03:28:34
++0300] [6925] [INFO] Starting gunicorn 23.0.0
+Apr 21 03:28:34 f418b3c5b5c3.vps.myjino.ru gunicorn[6925]: [2025-04-21 03:28:34
++0300] [6925] [ERROR] Connection in use: ('0.0.0.0', 5000)
+Apr 21 03:28:34 f418b3c5b5c3.vps.myjino.ru gunicorn[6925]: [2025-04-21 03:28:34
++0300] [6925] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+Apr 21 03:28:35 f418b3c5b5c3.vps.myjino.ru gunicorn[6925]: [2025-04-21 03:28:35
++0300] [6925] [ERROR] Connection in use: ('0.0.0.0', 5000)
+Apr 21 03:28:35 f418b3c5b5c3.vps.myjino.ru gunicorn[6925]: [2025-04-21 03:28:35
++0300] [6925] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+Apr 21 03:28:36 f418b3c5b5c3.vps.myjino.ru gunicorn[6925]: [2025-04-21 03:28:36
++0300] [6925] [ERROR] Connection in use: ('0.0.0.0', 5000)
+Apr 21 03:28:36 f418b3c5b5c3.vps.myjino.ru gunicorn[6925]: [2025-04-21 03:28:36
++0300] [6925] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+Apr 21 03:28:37 f418b3c5b5c3.vps.myjino.ru gunicorn[6925]: [2025-04-21 03:28:37
++0300] [6925] [ERROR] Connection in use: ('0.0.0.0', 5000)
+Apr 21 03:28:37 f418b3c5b5c3.vps.myjino.ru gunicorn[6925]: [2025-04-21 03:28:37
++0300] [6925] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+Apr 21 03:28:38 f418b3c5b5c3.vps.myjino.ru gunicorn[6925]: [2025-04-21 03:28:38
++0300] [6925] [ERROR] Connection in use: ('0.0.0.0', 5000)
+Apr 21 03:28:38 f418b3c5b5c3.vps.myjino.ru gunicorn[6925]: [2025-04-21 03:28:38
++0300] [6925] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+Apr 21 03:28:39 f418b3c5b5c3.vps.myjino.ru gunicorn[6925]: [2025-04-21 03:28:39
++0300] [6925] [ERROR] Can't connect to ('0.0.0.0', 5000)
+Apr 21 03:28:39 f418b3c5b5c3.vps.myjino.ru systemd[1]: s
+ocialmonitor.service: Main process exited, code=exited, status=1/FAILURE
+Apr 21 03:28:39 f418b3c5b5c3.vps.myjino.ru systemd[1]:
+socialmonitor.service: Failed with result 'exit-code'.
+Apr 21 03:28:39 f418b3c5b5c3.vps.myjino.ru systemd[1]: socialmonitor.service: Sc
+heduled restart job, restart counter is at 88.
+Apr 21 03:28:39 f418b3c5b5c3.vps.myjino.ru systemd[1]: Stopped Social Media Moni
+toring Flask App.
+Apr 21 03:28:39 f418b3c5b5c3.vps.myjino.ru systemd[1]: Started Social Media Moni
+toring Flask App.
+Apr 21 03:28:39 f418b3c5b5c3.vps.myjino.ru gunicorn[6928]: [2025-04-21 03:28:39
++0300] [6928] [INFO] Starting gunicorn 23.0.0
+Apr 21 03:28:39 f418b3c5b5c3.vps.myjino.ru gunicorn[6928]: [2025-04-21 03:28:39
++0300] [6928] [ERROR] Connection in use: ('0.0.0.0', 5000)
+Apr 21 03:28:39 f418b3c5b5c3.vps.myjino.ru gunicorn[6928]: [2025-04-21 03:28:39
++0300] [6928] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+Apr 21 03:28:40 f418b3c5b5c3.vps.myjino.ru gunicorn[6928]: [2025-04-21 03:28:40
++0300] [6928] [ERROR] Connection in use: ('0.0.0.0', 5000)
+Apr 21 03:28:40 f418b3c5b5c3.vps.myjino.ru gunicorn[6928]: [2025-04-21 03:28:40
++0300] [6928] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+Apr 21 03:28:41 f418b3c5b5c3.vps.myjino.ru gunicorn[6928]: [2025-04-21 03:28:41
++0300] [6928] [ERROR] Connection in use: ('0.0.0.0', 5000)
+Apr 21 03:28:41 f418b3c5b5c3.vps.myjino.ru gunicorn[6928]: [2025-04-21 03:28:41
++0300] [6928] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+Apr 21 03:28:42 f418b3c5b5c3.vps.myjino.ru gunicorn[6928]: [2025-04-21 03:28:42
++0300] [6928] [ERROR] Connection in use: ('0.0.0.0', 5000)
+Apr 21 03:28:42 f418b3c5b5c3.vps.myjino.ru gunicorn[6928]: [2025-04-21 03:28:42
++0300] [6928] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+Apr 21 03:28:43 f418b3c5b5c3.vps.myjino.ru gunicorn[6928]: [2025-04-21 03:28:43
++0300] [6928] [ERROR] Connection in use: ('0.0.0.0', 5000)
+Apr 21 03:28:43 f418b3c5b5c3.vps.myjino.ru gunicorn[6928]: [2025-04-21 03:28:43
++0300] [6928] [ERROR] connection to ('0.0.0.0', 5000) failed: [Errno 98] Address
+ already in use
+root@f418b3c5b5c3:~/MarketingMaster# ss -tulnp | grep 5000
+tcp   LISTEN 0      128          0.0.0.0:5000      0.0.0.0:*    users:(("gunicorn",pid=6334,fd=5),("gunicorn",pid=5745,fd=5))
+root@f418b3c5b5c3:~/MarketingMaster# systemctl status postgresql
+● postgresql.service - PostgreSQL RDBMS
+     Loaded: loaded (/lib/systemd/system/postgresql.service; enabled; vendor pre
+set: enabled)
+     Active: active (exited) since Mon 2025-04-21 03:04:55 MSK; 24min
+ ago
+   Main PID: 218 (code=exited, status=0/SUCCESS)
+
+Mar 14 04:44:37 f418b3c5b5c3.vps.myjino.ru systemd[1]: Starting PostgreSQL RDBMS
+...
+Mar 14 04:44:37 f418b3c5b5c3.vps.myjino.ru systemd[1]: Finished PostgreSQL RDBMS
+.
+Apr 17 06:19:40 f418b3c5b5c3.vps.myjino.ru systemd[1]: postgresql.service: Deact
+ivated successfully.
+Apr 17 06:19:40 f418b3c5b5c3.vps.myjino.ru systemd[1]: Stopped PostgreSQL RDBMS.
+Apr 21 03:04:55 f418b3c5b5c3.vps.myjino.ru systemd[1]: Starting PostgreSQL RDBMS
+...
+Apr 21 03:04:55 f418b3c5b5c3.vps.myjino.ru systemd[1]: Finished PostgreSQL RDBMS
+.
+root@f418b3c5b5c3:~/MarketingMaster#

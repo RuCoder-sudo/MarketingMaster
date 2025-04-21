@@ -120,7 +120,7 @@ def search_ok(project_id, community_id, keywords):
         api_url = "https://api.ok.ru/fb.do"
         
         # Prepare parameters
-        method = "group.getStatuses"
+        method = "group.getDiscussions"
         application_key = ok_public_key
         
         # Generate signature
@@ -128,7 +128,8 @@ def search_ok(project_id, community_id, keywords):
             "application_key": application_key,
             "format": "json",
             "method": method,
-            "gid": community_id
+            "gid": community_id,
+            "count": "100"  # Get up to 100 discussions
         }
         
         # Sort parameters alphabetically by key
@@ -147,6 +148,7 @@ def search_ok(project_id, community_id, keywords):
             "format": "json",
             "method": method,
             "gid": community_id,
+            "count": "100",  # Get up to 100 discussions
             "access_token": ok_token,
             "sig": sig
         }
@@ -161,18 +163,27 @@ def search_ok(project_id, community_id, keywords):
         
         # Process the posts
         found_count = 0
-        for post in data.get('statuses', []):
-            post_text = post.get('text', '')
+        discussions = data.get('discussions', [])
+        
+        # Log the response for debugging
+        save_log(f"OK API response: found {len(discussions)} discussions", level="INFO")
+        
+        for discussion in discussions:
+            # Extract the text content from the discussion
+            discussion_text = discussion.get('title', '') + ' ' + discussion.get('description', '')
             
             # Check if post contains any of the keywords
             for keyword in keywords:
-                if keyword.lower() in post_text.lower():
+                if keyword.lower() in discussion_text.lower():
                     # Check if we already have this mention
+                    topic_id = discussion.get('id', '')
+                    author_id = discussion.get('author_uid', '')
+                    
                     existing = Mention.query.filter_by(
                         project_id=project_id,
                         social_network='ok',
-                        author_id=post.get('uid', ''),
-                        post_url=f"https://ok.ru/group/{community_id}/topic/{post.get('id', '')}"
+                        author_id=author_id,
+                        post_url=f"https://ok.ru/group/{community_id}/topic/{topic_id}"
                     ).first()
                     
                     if not existing:
@@ -180,11 +191,11 @@ def search_ok(project_id, community_id, keywords):
                         mention = Mention(
                             project_id=project_id,
                             social_network='ok',
-                            content=post_text,
-                            post_url=f"https://ok.ru/group/{community_id}/topic/{post.get('id', '')}",
-                            post_date=datetime.fromtimestamp(post.get('date', time.time())/1000),
-                            author_id=post.get('uid', ''),
-                            author_name=post.get('name', 'OK User')
+                            content=discussion_text,
+                            post_url=f"https://ok.ru/group/{community_id}/topic/{topic_id}",
+                            post_date=datetime.fromtimestamp(int(discussion.get('creation_date', time.time()))/1000),
+                            author_id=author_id,
+                            author_name=discussion.get('author_name', 'OK User')
                         )
                         db.session.add(mention)
                         found_count += 1
