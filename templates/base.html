@@ -19,6 +19,7 @@
     
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/theme-switcher.css') }}" rel="stylesheet">
     
     {% block extra_css %}{% endblock %}
 </head>
@@ -142,13 +143,14 @@
     
     <!-- Custom JavaScript -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
     
     {% block extra_js %}{% endblock %}
     
     <!-- Индикатор загрузки -->
     <div id="loading-overlay" class="loading-overlay">
         <div class="loading-spinner-large"></div>
-        <p class="loading-text">Выполняется поиск...</p>
+        <!-- <p class="loading-text">Выполняется поиск...</p> -->
     </div>
 </body>
 </html>

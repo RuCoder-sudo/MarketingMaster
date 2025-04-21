@@ -1,0 +1,68 @@
+/* Стили для переключателя темы */
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    color: #ffc107; /* Желтый цвет для иконки солнца */
+    font-size: 1.2rem;
+}
+
+.theme-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: rotate(15deg);
+}
+
+[data-bs-theme="dark"] .theme-toggle {
+    color: #f8f9fa; /* Светлый цвет для иконки луны */
+}
+
+[data-bs-theme="light"] .navbar {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+}
+
+[data-bs-theme="light"] .navbar-dark .navbar-nav .nav-link {
+    color: #212529;
+}
+
+[data-bs-theme="light"] .navbar-dark .navbar-nav .nav-link.active {
+    color: #0d6efd;
+}
+
+[data-bs-theme="light"] .navbar-dark .navbar-brand {
+    color: #212529;
+}
+
+[data-bs-theme="light"] .bg-dark {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+}
+
+[data-bs-theme="light"] footer.bg-dark {
+    border-top: 1px solid #dee2e6;
+}
+
+[data-bs-theme="light"] footer.bg-dark .text-light {
+    color: #212529 !important;
+}
+
+[data-bs-theme="light"] footer.bg-dark .text-muted {
+    color: #6c757d !important;
+}
+
+[data-bs-theme="light"] .btn-outline-light {
+    color: #212529;
+    border-color: #212529;
+}
+
+[data-bs-theme="light"] .dropdown-menu {
+    background-color: #ffffff;
+    color: #212529;
+}
