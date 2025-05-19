@@ -26,10 +26,6 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-comment-dots me-2"></i>
-                Мониторинг упоминаний
-            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -117,20 +113,71 @@
     </div>
     
     <!-- Footer -->
-    <footer class="bg-dark text-light py-4 mt-5">
+    <footer class="bg-dark text-light py-5 mt-5">
         <div class="container">
             <div class="row">
-                <div class="col-md-6">
-                    <h5>Мониторинг упоминаний в соцсетях</h5>
+                <div class="col-md-4 mb-4">
+                    <h5 class="mb-3 border-bottom pb-2">MarketingMaster</h5>
                     <p class="text-muted">
-                        Инструмент для отслеживания упоминаний в ВКонтакте и Одноклассниках
+                        Профессиональный инструмент для мониторинга упоминаний в социальных сетях и анализа данных
                     </p>
+                    <div class="mt-3">
+                        <button id="theme-toggle" class="theme-toggle me-2" aria-label="Переключить тему">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                        <span class="text-muted ms-2">Изменить тему оформления</span>
+                    </div>
                 </div>
-                <div class="col-md-6 text-md-end">
-                    <button id="theme-toggle" class="theme-toggle me-2" aria-label="Переключить тему">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <p class="text-muted">&copy; 2023 Мониторинг упоминаний</p>
+                <div class="col-md-4 mb-4">
+                    <h5 class="mb-3 border-bottom pb-2">Навигация</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="{{ url_for('index') }}" class="text-decoration-none text-muted">
+                                <i class="fas fa-home me-1 text-warning"></i> Главная
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{{ url_for('settings') }}" class="text-decoration-none text-muted">
+                                <i class="fas fa-cog me-1 text-info"></i> Настройки
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{{ url_for('search') }}" class="text-decoration-none text-muted">
+                                <i class="fas fa-search me-1 text-success"></i> Поиск
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{{ url_for('analytics') }}" class="text-decoration-none text-muted">
+                                <i class="fas fa-chart-line me-1 text-primary"></i> Аналитика
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{{ url_for('logs') }}" class="text-decoration-none text-muted">
+                                <i class="fas fa-clipboard-list me-1 text-danger"></i> Логи
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="mb-3 border-bottom pb-2">Социальные сети</h5>
+                    <div class="d-flex gap-3 mb-3">
+                        <a href="#" class="text-decoration-none text-white">
+                            <i class="fab fa-vk fa-2x"></i>
+                        </a>
+                        <a href="#" class="text-decoration-none text-white">
+                            <i class="fab fa-odnoklassniki fa-2x"></i>
+                        </a>
+                        <a href="#" class="text-decoration-none text-white">
+                            <i class="fab fa-telegram fa-2x"></i>
+                        </a>
+                        <a href="#" class="text-decoration-none text-white">
+                            <i class="fab fa-instagram fa-2x"></i>
+                        </a>
+                    </div>
+                    <p class="text-muted">
+                        <i class="fas fa-envelope me-2"></i> support@marketingmaster.space
+                    </p>
+                    <p class="text-muted">&copy; 2025 MarketingMaster. Все права защищены.</p>
                 </div>
             </div>
         </div>

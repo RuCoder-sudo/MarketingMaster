@@ -191,6 +191,33 @@
     --bs-dropdown-link-active-color: #fff;
 }
 
+/* Исправление текста в светлом режиме */
+[data-bs-theme="light"] .text-light,
+[data-bs-theme="light"] .text-white {
+    color: #212529 !important;
+}
+
+[data-bs-theme="light"] .text-muted {
+    color: #6c757d !important;
+}
+
+[data-bs-theme="light"] .bg-dark {
+    background-color: #e9ecef !important;
+}
+
+[data-bs-theme="light"] .navbar-dark {
+    background-color: #0d6efd !important;
+}
+
+[data-bs-theme="light"] .card-header {
+    color: #fff !important;
+}
+
+[data-bs-theme="light"] .lead,
+[data-bs-theme="light"] p:not(.dropdown-item) {
+    color: #333 !important;
+}
+
 [data-bs-theme="dark"] {
     --bs-body-color: #e9ecef;
     --bs-body-bg: #1c2333;
