@@ -41,10 +41,16 @@
                             <i class="fas fa-search me-1 text-success"></i> Поиск
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == url_for('analytics') %}active{% endif %}" href="{{ url_for('analytics') }}">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if request.path == url_for('analytics') or request.path == url_for('competitor_analysis') or request.path == url_for('seo_analysis') %}active{% endif %}" 
+                           href="#" id="analyticsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-chart-line me-1 text-primary"></i> Аналитика
                         </a>
+                        <ul class="dropdown-menu" aria-labelledby="analyticsDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('analytics') }}">Общая аналитика</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('seo_analysis') }}">SEO анализ</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('competitor_analysis') }}">Анализ конкурентов</a></li>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == url_for('logs') %}active{% endif %}" href="{{ url_for('logs') }}">
@@ -148,6 +154,11 @@
                                 <li class="mb-2">
                                     <a href="{{ url_for('seo_analysis') }}" class="text-white text-decoration-none">
                                         <i class="fas fa-angle-right me-2"></i>SEO анализ
+                                    </a>
+                                </li>
+                                <li class="mb-2">
+                                    <a href="{{ url_for('competitor_analysis') }}" class="text-white text-decoration-none">
+                                        <i class="fas fa-angle-right me-2"></i>Анализ конкурентов
                                     </a>
                                 </li>
                                 <li class="mb-2">
