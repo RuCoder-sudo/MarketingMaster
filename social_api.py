@@ -448,11 +448,82 @@ def search_instagram(project_id, keywords, start_date=None, end_date=None):
     Returns:
         int: Number of new mentions found
     """
+    
+def search_kwork_ru(project_id, keywords, start_date=None, end_date=None):
+    """
+    Search for mentions in Kwork.ru projects
+    
+    Args:
+        project_id (int): Project ID
+        keywords (list): List of keywords to search for
+        start_date (datetime): Start date for search
+        end_date (datetime): End date for search
+        
+    Returns:
+        int: Number of new mentions found
+    """
+    from app import db
+    from models import Mention
+    from web_scraper import search_kwork, convert_kwork_results_to_mentions
+    import logging
+    
+    new_mentions_count = 0
+    
+    try:
+        for keyword in keywords:
+            # Поиск проектов на Kwork по ключевому слову
+            results = search_kwork(keyword.keyword, max_pages=2)
+            
+            if not results:
+                logging.warning(f"Не найдено проектов на Kwork по ключевому слову: {keyword.keyword}")
+                continue
+            
+            # Преобразование результатов в формат упоминаний
+            mentions = convert_kwork_results_to_mentions(project_id, results)
+            
+            for mention in mentions:
+                # Проверка на дубликаты (по URL проекта)
+                existing_mention = Mention.query.filter_by(
+                    project_id=project_id,
+                    post_url=mention.post_url
+                ).first()
+                
+                if not existing_mention:
+                    db.session.add(mention)
+                    new_mentions_count += 1
+            
+            # Сохраняем изменения в базе данных после обработки каждого ключевого слова
+            if new_mentions_count > 0:
+                db.session.commit()
+                
+    except Exception as e:
+        logging.error(f"Ошибка при поиске на Kwork.ru: {str(e)}")
+        db.session.rollback()
+    
+    return new_mentions_count
+
+def search_instagram(project_id, keywords, start_date=None, end_date=None):
+    """
+    Search for mentions in Instagram posts
+    
+    Args:
+        project_id (int): Project ID
+        keywords (list): List of keywords to search for
+        start_date (datetime): Start date for search
+        end_date (datetime): End date for search
+        
+    Returns:
+        int: Number of new mentions found
+    """
+    from app import db
+    from models import Mention, Settings
+    from utils import save_log
+    
     # Get Instagram API credentials
     settings = Settings.query.filter_by(project_id=project_id).first()
     if not settings or not settings.instagram_token:
         save_log(f"Instagram API token not found for project {project_id}", level="ERROR")
-        raise ValueError("Instagram API token not found")
+        return 0
     
     # Check if there are accounts to monitor
     if not settings.instagram_accounts:

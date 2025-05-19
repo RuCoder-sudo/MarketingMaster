@@ -205,6 +205,15 @@
     background-color: #e9ecef !important;
 }
 
+/* Улучшение читаемости текста в подвале для светлой темы */
+[data-bs-theme="light"] footer.bg-dark {
+    background-color: #1c2333 !important;
+}
+
+[data-bs-theme="light"] footer .text-white {
+    color: #ffffff !important;
+}
+
 [data-bs-theme="light"] .navbar-dark {
     background-color: #ffffff !important;
     border-bottom: 1px solid #dee2e6 !important;
@@ -239,8 +248,55 @@
 [data-bs-theme="light"] h3, 
 [data-bs-theme="light"] h4, 
 [data-bs-theme="light"] h5, 
-[data-bs-theme="light"] h6 {
+[data-bs-theme="light"] h6,
+[data-bs-theme="light"] .form-label,
+[data-bs-theme="light"] .text-white:not(footer *),
+[data-bs-theme="light"] .filter-label,
+[data-bs-theme="light"] .form-select-label,
+[data-bs-theme="light"] .input-group-text,
+[data-bs-theme="light"] .form-text {
     color: #333 !important;
+}
+
+/* Стилизация для блока уведомлений */
+.notification-dropdown {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.notification-item:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.notification-item .btn-close {
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+}
+
+.notification-item:hover .btn-close {
+    opacity: 1;
+}
+
+/* Стили для уведомлений по типам */
+.notification-item .fa-info-circle + div .fw-bold {
+    color: #0d6efd;
+}
+
+.notification-item .fa-exclamation-triangle + div .fw-bold {
+    color: #ffc107;
+}
+
+.notification-item .fa-check-circle + div .fw-bold {
+    color: #198754;
+}
+
+.notification-item .fa-times-circle + div .fw-bold {
+    color: #dc3545;
 }
 
 [data-bs-theme="dark"] {

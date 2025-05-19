@@ -37,7 +37,7 @@ db.init_app(app)
 
 # Import components after initializing db to avoid circular imports
 from models import Project, Settings, Keyword, Mention, Log
-from social_api import search_vk, search_ok, search_telegram, search_instagram
+from social_api import search_vk, search_ok, search_telegram, search_instagram, search_kwork_ru
 from notifications import send_notifications
 from background_tasks import BackgroundSearcher
 from utils import highlight_text, get_active_project, save_log
@@ -379,12 +379,20 @@ def search():
                     instagram_count = search_instagram(active_project.id, [k.keyword for k in keywords], 
                                                  start_date, end_date)
                 
+                # Kwork.ru поиск - не требует токенов
+                kwork_count = 0
+                # Добавляем флажок для поиска на Kwork.ru
+                if request.form.get('include_kwork') == 'on':
+                    # Kwork.ru search
+                    kwork_count = search_kwork_ru(active_project.id, keywords, start_date, end_date)
+                
                 # Показываем результаты поиска
                 flash_message = 'Поиск завершен! Найдено новых упоминаний: '
                 flash_message += f'ВКонтакте - {vk_count}, ' if settings.vk_token else ''
                 flash_message += f'Одноклассники - {ok_count}, ' if settings.ok_token and settings.ok_communities else ''
                 flash_message += f'Telegram - {telegram_count}, ' if settings.telegram_token and settings.telegram_channels else ''
-                flash_message += f'Instagram - {instagram_count}' if settings.instagram_token and settings.instagram_accounts else ''
+                flash_message += f'Instagram - {instagram_count}, ' if settings.instagram_token and settings.instagram_accounts else ''
+                flash_message += f'Kwork.ru - {kwork_count}' if request.form.get('include_kwork') == 'on' else ''
                 
                 # Удаляем последнюю запятую, если она есть
                 if flash_message.endswith(', '):

@@ -92,6 +92,42 @@ ALTER USER marketingmaster WITH SUPERUSER;
 # Проверка подключения к базе данных
 psql -U marketingmaster -d marketingmaster -h localhost
 # Введите пароль, который вы установили выше
+# Чтобы выйти из консоли PostgreSQL, введите \q
+
+# Создание таблиц базы данных происходит автоматически при первом запуске приложения
+# Но можно инициализировать базу данных вручную
+cd /var/www/MarketingMaster
+source venv/bin/activate
+export $(cat .env | xargs)
+
+# Запуск Python-консоли для создания таблиц
+python -c "from app import db; db.create_all()"
+```
+
+### Возможные проблемы с PostgreSQL
+
+Если у вас возникают проблемы с подключением к PostgreSQL, проверьте следующее:
+
+1. Убедитесь, что сервис PostgreSQL запущен:
+```bash
+systemctl status postgresql
+```
+
+2. Проверьте настройки аутентификации в файле `/etc/postgresql/*/main/pg_hba.conf`:
+```bash
+sudo nano /etc/postgresql/*/main/pg_hba.conf
+```
+
+Добавьте или измените следующие строки для разрешения локального подключения:
+```
+local   all             marketingmaster                       md5
+host    all             marketingmaster     127.0.0.1/32      md5
+host    all             marketingmaster     ::1/128           md5
+```
+
+3. После изменения конфигурации перезапустите PostgreSQL:
+```bash
+sudo systemctl restart postgresql
 ```
 
 ## Настройка переменных окружения
@@ -196,6 +232,36 @@ systemctl start marketingmaster.service
 
 # Проверка статуса службы
 systemctl status marketingmaster.service
+```
+
+### Управление службой MarketingMaster
+
+После установки службы вы можете использовать следующие команды для управления ею:
+
+```bash
+# Запуск службы
+sudo systemctl start marketingmaster.service
+
+# Остановка службы
+sudo systemctl stop marketingmaster.service
+
+# Перезапуск службы (например, после обновления кода)
+sudo systemctl restart marketingmaster.service
+
+# Проверка статуса службы
+sudo systemctl status marketingmaster.service
+
+# Просмотр логов службы
+sudo journalctl -u marketingmaster.service -f
+```
+
+### Автоматический запуск при перезагрузке сервера
+
+После настройки службы systemd, приложение будет автоматически запускаться при загрузке сервера. Чтобы проверить, что служба настроена на автозапуск:
+
+```bash
+sudo systemctl is-enabled marketingmaster.service
+# Должно вывести "enabled"
 ```
 
 ## Настройка SSL с Let's Encrypt
