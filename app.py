@@ -570,6 +570,113 @@ def export_logs():
         as_attachment=True
     )
 
+@app.route('/analytics')
+def analytics():
+    active_project = get_active_project()
+    
+    # Получаем параметры фильтрации из запроса
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    social_network = request.args.get('social_network')
+    
+    # Преобразуем строки дат в объекты datetime, если они указаны
+    start_date = None
+    end_date = None
+    
+    if date_from:
+        try:
+            start_date = datetime.strptime(date_from, '%Y-%m-%d')
+        except ValueError:
+            flash('Некорректный формат начальной даты!', 'warning')
+    
+    if date_to:
+        try:
+            end_date = datetime.strptime(date_to, '%Y-%m-%d')
+            # Устанавливаем время на конец дня
+            end_date = end_date.replace(hour=23, minute=59, second=59)
+        except ValueError:
+            flash('Некорректный формат конечной даты!', 'warning')
+    
+    # Базовый запрос для получения упоминаний
+    query = Mention.query.filter_by(project_id=active_project.id)
+    
+    # Применяем фильтры
+    if start_date:
+        query = query.filter(Mention.post_date >= start_date)
+    
+    if end_date:
+        query = query.filter(Mention.post_date <= end_date)
+    
+    if social_network:
+        query = query.filter(Mention.social_network == social_network)
+    
+    # Получаем все упоминания с применёнными фильтрами
+    mentions = query.all()
+    
+    # Считаем статистику
+    total_mentions = len(mentions)
+    positive_mentions = len([m for m in mentions if m.sentiment == 'positive'])
+    negative_mentions = len([m for m in mentions if m.sentiment == 'negative'])
+    neutral_mentions = total_mentions - positive_mentions - negative_mentions
+    
+    # Статистика по социальным сетям
+    networks_data = {
+        'vk': len([m for m in mentions if m.social_network == 'vk']),
+        'ok': len([m for m in mentions if m.social_network == 'ok']),
+        'telegram': len([m for m in mentions if m.social_network == 'telegram']),
+        'instagram': len([m for m in mentions if m.social_network == 'instagram'])
+    }
+    
+    # Временная динамика (по дням)
+    if mentions:
+        # Сортируем упоминания по дате
+        sorted_mentions = sorted(mentions, key=lambda m: m.post_date if m.post_date else m.found_date)
+        
+        # Группируем по датам
+        from collections import defaultdict
+        timeline_data = defaultdict(int)
+        
+        for mention in sorted_mentions:
+            date = (mention.post_date if mention.post_date else mention.found_date).strftime('%Y-%m-%d')
+            timeline_data[date] += 1
+        
+        timeline_labels = list(timeline_data.keys())
+        timeline_values = list(timeline_data.values())
+    else:
+        timeline_labels = []
+        timeline_values = []
+    
+    # Статистика по ключевым словам
+    keywords = Keyword.query.filter_by(project_id=active_project.id).all()
+    keywords_stats = {}
+    
+    for keyword in keywords:
+        count = 0
+        for mention in mentions:
+            if keyword.keyword.lower() in mention.content.lower():
+                count += 1
+        keywords_stats[keyword.keyword] = count
+    
+    # Сортируем ключевые слова по количеству упоминаний (в порядке убывания)
+    sorted_keywords = sorted(keywords_stats.items(), key=lambda x: x[1], reverse=True)
+    
+    # Берем только топ-10 ключевых слов
+    top_keywords = sorted_keywords[:10]
+    keywords_labels = [item[0] for item in top_keywords]
+    keywords_values = [item[1] for item in top_keywords]
+    
+    return render_template('analytics.html', 
+                          active_project=active_project,
+                          total_mentions=total_mentions,
+                          positive_mentions=positive_mentions,
+                          negative_mentions=negative_mentions,
+                          neutral_mentions=neutral_mentions,
+                          networks_data=networks_data,
+                          timeline_labels=timeline_labels,
+                          timeline_values=timeline_values,
+                          keywords_labels=keywords_labels,
+                          keywords_values=keywords_values)
+
 @app.route('/extra')
 def extra():
     active_project = get_active_project()

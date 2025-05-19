@@ -184,6 +184,11 @@
     --bs-card-bg: #fff;
     --bs-dark: #343a40;
     --bs-border-color: #dee2e6;
+    --bs-navbar-dark-color: #212529;
+    --bs-navbar-dark-hover-color: #0d6efd;
+    --bs-dropdown-color: #212529;
+    --bs-dropdown-link-hover-color: #0a58ca;
+    --bs-dropdown-link-active-color: #fff;
 }
 
 [data-bs-theme="dark"] {
@@ -192,6 +197,8 @@
     --bs-card-bg: #212529;
     --bs-dark: #212529;
     --bs-border-color: #495057;
+    --bs-navbar-dark-color: #f8f9fa;
+    --bs-navbar-dark-hover-color: #fff;
 }
 
 .theme-toggle {
@@ -210,6 +217,31 @@
 .theme-toggle:hover {
     background-color: var(--bs-primary);
     color: white;
+}
+
+/* Улучшенные стили для светлого режима */
+[data-bs-theme="light"] .navbar-dark {
+    background-color: #343a40 !important;
+}
+
+[data-bs-theme="light"] .navbar-dark .nav-link,
+[data-bs-theme="light"] .navbar-dark .navbar-brand {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-bs-theme="light"] .navbar-dark .nav-link:hover,
+[data-bs-theme="light"] .navbar-dark .navbar-brand:hover {
+    color: #fff !important;
+}
+
+[data-bs-theme="light"] footer.bg-dark {
+    background-color: #343a40 !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Улучшенные стили для карточек в светлом режиме */
+[data-bs-theme="light"] .card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* New network badges */

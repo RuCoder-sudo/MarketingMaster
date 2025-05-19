@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}Аналитика - Мониторинг упоминаний в соцсетях{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>
+            <i class="fas fa-chart-line me-2"></i>
+            Аналитика
+        </h1>
+        <p class="lead">Статистика и визуализация данных о найденных упоминаниях</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Распределение упоминаний по социальным сетям
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="socialNetworkChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Динамика упоминаний по времени
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="timelineChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-smile me-2"></i>
+                    Тональность упоминаний
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="sentimentChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-tags me-2"></i>
+                    Популярные ключевые слова
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="keywordsChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-table me-2"></i>
+                    Статистика по проекту
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h3 class="display-4">{{ total_mentions }}</h3>
+                                <p class="mb-0">Всего упоминаний</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <h3 class="display-4">{{ positive_mentions }}</h3>
+                                <p class="mb-0">Позитивных</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-warning text-dark">
+                            <div class="card-body text-center">
+                                <h3 class="display-4">{{ neutral_mentions }}</h3>
+                                <p class="mb-0">Нейтральных</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-danger text-white">
+                            <div class="card-body text-center">
+                                <h3 class="display-4">{{ negative_mentions }}</h3>
+                                <p class="mb-0">Негативных</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-filter me-2"></i>
+                    Фильтры аналитики
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="analytics-filter-form" method="get" action="{{ url_for('analytics') }}">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="date_from" class="form-label">Дата с:</label>
+                            <input type="date" class="form-control" id="date_from" name="date_from" value="{{ request.args.get('date_from', '') }}">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="date_to" class="form-label">Дата по:</label>
+                            <input type="date" class="form-control" id="date_to" name="date_to" value="{{ request.args.get('date_to', '') }}">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="social_network" class="form-label">Социальная сеть:</label>
+                            <select class="form-select" id="social_network" name="social_network">
+                                <option value="" {% if not request.args.get('social_network') %}selected{% endif %}>Все</option>
+                                <option value="vk" {% if request.args.get('social_network') == 'vk' %}selected{% endif %}>ВКонтакте</option>
+                                <option value="ok" {% if request.args.get('social_network') == 'ok' %}selected{% endif %}>Одноклассники</option>
+                                <option value="telegram" {% if request.args.get('social_network') == 'telegram' %}selected{% endif %}>Telegram</option>
+                                <option value="instagram" {% if request.args.get('social_network') == 'instagram' %}selected{% endif %}>Instagram</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-sync-alt me-2"></i>
+                            Обновить аналитику
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Данные для графика по социальным сетям
+    const socialNetworkData = {
+        labels: [
+            'ВКонтакте', 
+            'Одноклассники', 
+            'Telegram', 
+            'Instagram'
+        ],
+        datasets: [{
+            data: [{{ networks_data['vk'] }}, {{ networks_data['ok'] }}, {{ networks_data['telegram'] }}, {{ networks_data['instagram'] }}],
+            backgroundColor: ['#4C75A3', '#EE8208', '#0088cc', '#e1306c'],
+            borderWidth: 1
+        }]
+    };
+    
+    // График по социальным сетям
+    const socialNetworkChart = new Chart(
+        document.getElementById('socialNetworkChart'),
+        {
+            type: 'pie',
+            data: socialNetworkData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Распределение по соцсетям'
+                    }
+                }
+            }
+        }
+    );
+    
+    // Данные для графика временной динамики
+    const timelineData = {
+        labels: {{ timeline_labels|safe }},
+        datasets: [{
+            label: 'Количество упоминаний',
+            data: {{ timeline_values }},
+            fill: false,
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+        }]
+    };
+    
+    // График временной динамики
+    const timelineChart = new Chart(
+        document.getElementById('timelineChart'),
+        {
+            type: 'line',
+            data: timelineData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        }
+    );
+    
+    // Данные для графика тональности
+    const sentimentData = {
+        labels: ['Позитивные', 'Нейтральные', 'Негативные'],
+        datasets: [{
+            data: [{{ positive_mentions }}, {{ neutral_mentions }}, {{ negative_mentions }}],
+            backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+            borderWidth: 1
+        }]
+    };
+    
+    // График тональности
+    const sentimentChart = new Chart(
+        document.getElementById('sentimentChart'),
+        {
+            type: 'doughnut',
+            data: sentimentData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Тональность упоминаний'
+                    }
+                }
+            }
+        }
+    );
+    
+    // Данные для графика ключевых слов
+    const keywordsData = {
+        labels: {{ keywords_labels|safe }},
+        datasets: [{
+            label: 'Количество упоминаний',
+            data: {{ keywords_values }},
+            backgroundColor: 'rgba(54, 162, 235, 0.8)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    };
+    
+    // График ключевых слов
+    const keywordsChart = new Chart(
+        document.getElementById('keywordsChart'),
+        {
+            type: 'bar',
+            data: keywordsData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                indexAxis: 'y'
+            }
+        }
+    );
+});
+</script>
+{% endblock %}

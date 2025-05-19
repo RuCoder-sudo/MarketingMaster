@@ -51,13 +51,18 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('analytics') %}active{% endif %}" href="{{ url_for('analytics') }}">
+                            <i class="fas fa-chart-line me-1 text-primary"></i> Аналитика
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {% if request.path == url_for('logs') %}active{% endif %}" href="{{ url_for('logs') }}">
                             <i class="fas fa-clipboard-list me-1 text-danger"></i> Логи
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == url_for('extra') %}active{% endif %}" href="{{ url_for('extra') }}">
-                            <i class="fas fa-tools me-1 text-primary"></i> Дополнительно
+                            <i class="fas fa-tools me-1 text-secondary"></i> Дополнительно
                         </a>
                     </li>
                 </ul>
