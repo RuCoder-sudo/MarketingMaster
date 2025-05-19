@@ -400,11 +400,12 @@ def search():
                 
                 flash(flash_message, 'success')
                 save_log(f"Ручной поиск завершен для проекта {active_project.name}. "
-                       f"Найдено: ВК - {vk_count}, OK - {ok_count}, Telegram - {telegram_count}, Instagram - {instagram_count}")
+                       f"Найдено: ВК - {vk_count}, OK - {ok_count}, Telegram - {telegram_count}, "
+                       f"Instagram - {instagram_count}, Kwork.ru - {kwork_count}")
                 
                 # Проверяем, нужно ли отправить уведомления
                 if settings.enable_email_notifications or settings.enable_telegram_notifications:
-                    total_count = vk_count + ok_count + telegram_count + instagram_count
+                    total_count = vk_count + ok_count + telegram_count + instagram_count + kwork_count
                     if total_count > 0:
                         try:
                             # Получаем упоминания, найденные в последнюю минуту (новые упоминания из этого поиска)
