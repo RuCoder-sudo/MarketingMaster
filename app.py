@@ -689,6 +689,261 @@ def export_pdf():
         as_attachment=True
     )
 
+@app.route('/seo')
+def seo_analysis():
+    """SEO-анализ упоминаний для оптимизации поисковых запросов"""
+    active_project = get_active_project()
+    
+    # Получаем параметры фильтрации из запроса
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    social_network = request.args.get('social_network')
+    min_mentions = request.args.get('min_mentions', 5, type=int)
+    
+    # Преобразуем строки дат в объекты datetime, если они указаны
+    start_date = None
+    end_date = None
+    
+    if date_from:
+        try:
+            start_date = datetime.strptime(date_from, '%Y-%m-%d')
+        except ValueError:
+            flash('Некорректный формат начальной даты!', 'warning')
+    
+    if date_to:
+        try:
+            end_date = datetime.strptime(date_to, '%Y-%m-%d')
+            # Устанавливаем время на конец дня
+            end_date = end_date.replace(hour=23, minute=59, second=59)
+        except ValueError:
+            flash('Некорректный формат конечной даты!', 'warning')
+    
+    # Базовый запрос для получения упоминаний
+    query = Mention.query.filter_by(project_id=active_project.id)
+    
+    # Применяем фильтры
+    if start_date:
+        query = query.filter(Mention.post_date >= start_date)
+    
+    if end_date:
+        query = query.filter(Mention.post_date <= end_date)
+    
+    if social_network:
+        query = query.filter(Mention.social_network == social_network)
+    
+    # Получаем все упоминания с применёнными фильтрами и сортируем по дате (новые - вверху)
+    mentions = query.order_by(Mention.post_date.desc()).all()
+    
+    # Анализ ключевых слов
+    keywords = Keyword.query.filter_by(project_id=active_project.id).all()
+    keywords_stats = {}
+    
+    for keyword in keywords:
+        count = 0
+        for mention in mentions:
+            if keyword.keyword.lower() in mention.content.lower():
+                count += 1
+        if count >= min_mentions:
+            keywords_stats[keyword.keyword] = count
+    
+    # Сортируем ключевые слова по количеству упоминаний (в порядке убывания)
+    sorted_keywords = sorted(keywords_stats.items(), key=lambda x: x[1], reverse=True)
+    
+    # Генерируем SEO-рекомендации для каждого ключевого слова
+    keywords_data = []
+    for keyword, count in sorted_keywords[:10]:  # Берем топ-10 ключевых слов
+        if count > 20:
+            recommendation = "Высокая частота, оптимально для целевых страниц"
+        elif count > 10:
+            recommendation = "Средняя частота, использовать в подзаголовках"
+        else:
+            recommendation = "Низкая частота, использовать в тегах и LSI"
+        keywords_data.append((keyword, count, recommendation))
+    
+    # Рекомендуемые внешние ссылки
+    link_recommendations = [
+        ("vk.com", "Высокий", "Социальные сети"),
+        ("ok.ru", "Средний", "Социальные сети"),
+        ("t.me", "Высокий", "Мессенджеры"),
+        ("instagram.com", "Высокий", "Социальные сети"),
+        ("habr.com", "Высокий", "Технический контент"),
+        ("vc.ru", "Средний", "Бизнес и маркетинг")
+    ]
+    
+    # Рекомендации по оптимизации контента
+    content_recommendations = [
+        "Используйте ключевые слова в заголовках H1 и H2",
+        "Добавьте ключевые слова в мета-теги description",
+        "Создайте больше контента по темам с наибольшим количеством упоминаний",
+        "Добавьте ключевые слова в URL-структуру",
+        "Оптимизируйте изображения с использованием ключевых слов в alt-атрибутах"
+    ]
+    
+    # Рекомендации по оптимизации репутации
+    reputation_recommendations = [
+        "Отвечайте на негативные упоминания в социальных сетях",
+        "Создавайте больше позитивного контента по ключевым темам",
+        "Стимулируйте положительные отзывы от довольных клиентов",
+        "Регулярно публикуйте новости и обновления в социальных сетях",
+        "Взаимодействуйте с лидерами мнений в вашей отрасли"
+    ]
+    
+    # Сравнение с конкурентами
+    competitors_data = [
+        ("Частота упоминаний", f"{len(mentions)} за период", "12-15 за период", "Увеличить частоту публикаций"),
+        ("Охват соцсетей", "2-3 платформы", "3-4 платформы", "Расширить присутствие"),
+        ("Положительные упоминания", "40%", "55%", "Улучшить качество контента"),
+        ("Вовлеченность", "Средняя", "Высокая", "Создавать больше интерактивного контента"),
+        ("Авторитетность", "Средняя", "Средняя", "Получить упоминания на авторитетных ресурсах")
+    ]
+    
+    return render_template('seo_report.html',
+                          active_project=active_project,
+                          keywords_data=keywords_data,
+                          link_recommendations=link_recommendations,
+                          content_recommendations=content_recommendations,
+                          reputation_recommendations=reputation_recommendations,
+                          competitors_data=competitors_data)
+
+@app.route('/export/seo_report')
+def export_seo_report():
+    """Экспортировать SEO-отчет в PDF"""
+    import weasyprint
+    from datetime import timedelta
+    
+    active_project = get_active_project()
+    
+    # Получаем параметры фильтрации из запроса
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    social_network = request.args.get('social_network')
+    min_mentions = request.args.get('min_mentions', 5, type=int)
+    
+    # Преобразуем строки дат в объекты datetime, если они указаны
+    start_date = None
+    end_date = None
+    
+    if date_from:
+        try:
+            start_date = datetime.strptime(date_from, '%Y-%m-%d')
+        except ValueError:
+            pass
+    
+    if date_to:
+        try:
+            end_date = datetime.strptime(date_to, '%Y-%m-%d')
+            # Устанавливаем время на конец дня
+            end_date = end_date.replace(hour=23, minute=59, second=59)
+        except ValueError:
+            pass
+    
+    # Базовый запрос для получения упоминаний
+    query = Mention.query.filter_by(project_id=active_project.id)
+    
+    # Применяем фильтры
+    if start_date:
+        query = query.filter(Mention.post_date >= start_date)
+    
+    if end_date:
+        query = query.filter(Mention.post_date <= end_date)
+    
+    if social_network:
+        query = query.filter(Mention.social_network == social_network)
+    
+    # Получаем все упоминания с применёнными фильтрами и сортируем по дате (новые - вверху)
+    mentions = query.order_by(Mention.post_date.desc()).all()
+    
+    # Анализ ключевых слов
+    keywords = Keyword.query.filter_by(project_id=active_project.id).all()
+    keywords_stats = {}
+    
+    for keyword in keywords:
+        count = 0
+        for mention in mentions:
+            if keyword.keyword.lower() in mention.content.lower():
+                count += 1
+        if count >= min_mentions:
+            keywords_stats[keyword.keyword] = count
+    
+    # Сортируем ключевые слова по количеству упоминаний (в порядке убывания)
+    sorted_keywords = sorted(keywords_stats.items(), key=lambda x: x[1], reverse=True)
+    
+    # Генерируем SEO-рекомендации для каждого ключевого слова
+    keywords_data = []
+    for keyword, count in sorted_keywords[:10]:  # Берем топ-10 ключевых слов
+        if count > 20:
+            recommendation = "Высокая частота, оптимально для целевых страниц"
+        elif count > 10:
+            recommendation = "Средняя частота, использовать в подзаголовках"
+        else:
+            recommendation = "Низкая частота, использовать в тегах и LSI"
+        keywords_data.append((keyword, count, recommendation))
+    
+    # Рекомендуемые внешние ссылки
+    link_recommendations = [
+        ("vk.com", "Высокий", "Социальные сети"),
+        ("ok.ru", "Средний", "Социальные сети"),
+        ("t.me", "Высокий", "Мессенджеры"),
+        ("instagram.com", "Высокий", "Социальные сети"),
+        ("habr.com", "Высокий", "Технический контент"),
+        ("vc.ru", "Средний", "Бизнес и маркетинг")
+    ]
+    
+    # Рекомендации по оптимизации контента
+    content_recommendations = [
+        "Используйте ключевые слова в заголовках H1 и H2",
+        "Добавьте ключевые слова в мета-теги description",
+        "Создайте больше контента по темам с наибольшим количеством упоминаний",
+        "Добавьте ключевые слова в URL-структуру",
+        "Оптимизируйте изображения с использованием ключевых слов в alt-атрибутах"
+    ]
+    
+    # Рекомендации по оптимизации репутации
+    reputation_recommendations = [
+        "Отвечайте на негативные упоминания в социальных сетях",
+        "Создавайте больше позитивного контента по ключевым темам",
+        "Стимулируйте положительные отзывы от довольных клиентов",
+        "Регулярно публикуйте новости и обновления в социальных сетях",
+        "Взаимодействуйте с лидерами мнений в вашей отрасли"
+    ]
+    
+    # Сравнение с конкурентами
+    competitors_data = [
+        ("Частота упоминаний", f"{len(mentions)} за период", "12-15 за период", "Увеличить частоту публикаций"),
+        ("Охват соцсетей", "2-3 платформы", "3-4 платформы", "Расширить присутствие"),
+        ("Положительные упоминания", "40%", "55%", "Улучшить качество контента"),
+        ("Вовлеченность", "Средняя", "Высокая", "Создавать больше интерактивного контента"),
+        ("Авторитетность", "Средняя", "Средняя", "Получить упоминания на авторитетных ресурсах")
+    ]
+    
+    # Формируем HTML отчёт
+    html = render_template('seo_report.html',
+                          active_project=active_project,
+                          keywords_data=keywords_data,
+                          link_recommendations=link_recommendations,
+                          content_recommendations=content_recommendations,
+                          reputation_recommendations=reputation_recommendations,
+                          competitors_data=competitors_data)
+    
+    # Генерируем PDF из HTML
+    pdf = weasyprint.HTML(string=html).write_pdf()
+    
+    # Создаем BytesIO объект для отправки файла
+    result = io.BytesIO(pdf)
+    result.seek(0)
+    
+    # Формируем имя файла
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f"seo_report_{active_project.name}_{timestamp}.pdf"
+    
+    # Отправляем PDF файл
+    return send_file(
+        result,
+        mimetype='application/pdf',
+        download_name=filename,
+        as_attachment=True
+    )
+
 @app.route('/analytics')
 def analytics():
     active_project = get_active_project()

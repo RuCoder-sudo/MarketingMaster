@@ -113,102 +113,73 @@
     </div>
     
     <!-- Footer -->
-    <footer class="bg-primary text-white py-4 mt-5">
+    <footer class="bg-dark text-white py-4 mt-5">
         <div class="container">
             <div class="row mb-4">
-                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
-                    <h5 class="text-uppercase"><i class="fas fa-home me-2"></i>Главное меню</h5>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <a href="{{ url_for('index') }}" class="text-white text-decoration-none">
-                                <i class="fas fa-angle-right me-2"></i>Главная
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{{ url_for('settings') }}" class="text-white text-decoration-none">
-                                <i class="fas fa-angle-right me-2"></i>Настройки
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{{ url_for('search') }}" class="text-white text-decoration-none">
-                                <i class="fas fa-angle-right me-2"></i>Поиск
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{{ url_for('analytics') }}" class="text-white text-decoration-none">
-                                <i class="fas fa-angle-right me-2"></i>Аналитика
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{{ url_for('logs') }}" class="text-white text-decoration-none">
-                                <i class="fas fa-angle-right me-2"></i>Логи
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
-                    <h5 class="text-uppercase"><i class="fas fa-project-diagram me-2"></i>Управление</h5>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <a href="{{ url_for('project_management') }}" class="text-white text-decoration-none">
-                                <i class="fas fa-angle-right me-2"></i>Проекты
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{{ url_for('extra') }}" class="text-white text-decoration-none">
-                                <i class="fas fa-angle-right me-2"></i>Дополнительно
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="#" class="text-white text-decoration-none">
-                                <i class="fas fa-angle-right me-2"></i>Инструкция
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
-                    <h5 class="text-uppercase"><i class="fas fa-share-alt me-2"></i>Соцсети</h5>
-                    <div class="d-flex flex-wrap mt-3">
-                        <a href="#" class="btn btn-outline-light me-2 mb-2" title="ВКонтакте">
-                            <i class="fab fa-vk"></i>
-                        </a>
-                        <a href="#" class="btn btn-outline-light me-2 mb-2" title="Одноклассники">
-                            <i class="fab fa-odnoklassniki"></i>
-                        </a>
-                        <a href="#" class="btn btn-outline-light me-2 mb-2" title="Telegram">
-                            <i class="fab fa-telegram"></i>
-                        </a>
-                        <a href="#" class="btn btn-outline-light me-2 mb-2" title="Instagram">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                    </div>
-                    <div class="mt-3">
-                        <button id="theme-toggle" class="btn btn-outline-light" aria-label="Переключить тему">
-                            <i class="fas fa-moon me-2"></i>Сменить тему
-                        </button>
+                <div class="col-md-8">
+                    <h5 class="mb-3">Навигация</h5>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <a href="{{ url_for('index') }}" class="text-white text-decoration-none">
+                                        <i class="fas fa-angle-right me-2"></i>Главная
+                                    </a>
+                                </li>
+                                <li class="mb-2">
+                                    <a href="{{ url_for('settings') }}" class="text-white text-decoration-none">
+                                        <i class="fas fa-angle-right me-2"></i>Настройки
+                                    </a>
+                                </li>
+                                <li class="mb-2">
+                                    <a href="{{ url_for('search') }}" class="text-white text-decoration-none">
+                                        <i class="fas fa-angle-right me-2"></i>Поиск
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-sm-4">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <a href="{{ url_for('analytics') }}" class="text-white text-decoration-none">
+                                        <i class="fas fa-angle-right me-2"></i>Аналитика
+                                    </a>
+                                </li>
+                                <li class="mb-2">
+                                    <a href="{{ url_for('seo_analysis') }}" class="text-white text-decoration-none">
+                                        <i class="fas fa-angle-right me-2"></i>SEO анализ
+                                    </a>
+                                </li>
+                                <li class="mb-2">
+                                    <a href="{{ url_for('logs') }}" class="text-white text-decoration-none">
+                                        <i class="fas fa-angle-right me-2"></i>Логи
+                                    </a>
+                                </li>
+                                <li class="mb-2">
+                                    <a href="{{ url_for('extra') }}" class="text-white text-decoration-none">
+                                        <i class="fas fa-angle-right me-2"></i>Дополнительно
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-sm-4">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <a href="{{ url_for('project_management') }}" class="text-white text-decoration-none">
+                                        <i class="fas fa-angle-right me-2"></i>Проекты
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
-                    <h5 class="text-uppercase"><i class="fas fa-envelope me-2"></i>Контакты</h5>
-                    <p>
-                        <i class="fas fa-map-marker-alt me-2"></i>Россия, Москва
-                    </p>
-                    <p>
-                        <i class="fas fa-envelope me-2"></i>support@marketingmaster.space
-                    </p>
-                    <p>
-                        <i class="fas fa-phone me-2"></i>+7 (999) 123-45-67
-                    </p>
+                <div class="col-md-4 text-md-end">
+                    <button id="theme-toggle" class="btn btn-outline-light mb-4" aria-label="Переключить тему">
+                        <i class="fas fa-moon me-2"></i>Сменить тему
+                    </button>
+                    <p class="mt-4">&copy; 2025 MarketingMaster. Все права защищены.</p>
                 </div>
-            </div>
-        </div>
-
-        <div class="bg-dark py-3">
-            <div class="container text-center">
-                <p class="mb-0">&copy; 2025 MarketingMaster. Все права защищены.</p>
             </div>
         </div>
     </footer>

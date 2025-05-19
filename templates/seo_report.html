@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}SEO анализ - Мониторинг упоминаний в соцсетях{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>
+            <i class="fas fa-chart-line me-2"></i>
+            SEO анализ упоминаний
+        </h1>
+        <p class="lead">Анализ упоминаний для SEO-оптимизации и улучшения позиций в поисковых системах</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-filter me-2"></i>
+                    Фильтры SEO-анализа
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="seo-filter-form" method="get" action="{{ url_for('seo_analysis') }}">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="date_from" class="form-label">Дата с:</label>
+                            <input type="date" class="form-control" id="date_from" name="date_from" value="{{ request.args.get('date_from', '') }}">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="date_to" class="form-label">Дата по:</label>
+                            <input type="date" class="form-control" id="date_to" name="date_to" value="{{ request.args.get('date_to', '') }}">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="social_network" class="form-label">Социальная сеть:</label>
+                            <select class="form-select" id="social_network" name="social_network">
+                                <option value="" {% if not request.args.get('social_network') %}selected{% endif %}>Все</option>
+                                <option value="vk" {% if request.args.get('social_network') == 'vk' %}selected{% endif %}>ВКонтакте</option>
+                                <option value="ok" {% if request.args.get('social_network') == 'ok' %}selected{% endif %}>Одноклассники</option>
+                                <option value="telegram" {% if request.args.get('social_network') == 'telegram' %}selected{% endif %}>Telegram</option>
+                                <option value="instagram" {% if request.args.get('social_network') == 'instagram' %}selected{% endif %}>Instagram</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="min_mentions" class="form-label">Мин. кол-во упоминаний:</label>
+                            <input type="number" class="form-control" id="min_mentions" name="min_mentions" min="1" value="{{ request.args.get('min_mentions', 5) }}">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter me-2"></i>
+                            Применить фильтры
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-tags me-2"></i>
+                    Популярные ключевые слова
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Ключевое слово</th>
+                                <th>Упоминаний</th>
+                                <th>Рекомендуемое использование</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for keyword, count, recommendation in keywords_data %}
+                            <tr>
+                                <td><span class="badge bg-primary">{{ keyword }}</span></td>
+                                <td>{{ count }}</td>
+                                <td>{{ recommendation }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-link me-2"></i>
+                    Рекомендуемые внешние ссылки
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for source, authority, category in link_recommendations %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ source }}</strong>
+                            <span class="d-block text-muted small">Категория: {{ category }}</span>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">{{ authority }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    SEO-рекомендации
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="border-bottom pb-2 mb-3">Оптимизация контента</h6>
+                        <ul class="list-group mb-4">
+                            {% for recommendation in content_recommendations %}
+                            <li class="list-group-item">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                {{ recommendation }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="border-bottom pb-2 mb-3">Оптимизация репутации</h6>
+                        <ul class="list-group mb-4">
+                            {% for recommendation in reputation_recommendations %}
+                            <li class="list-group-item">
+                                <i class="fas fa-star text-warning me-2"></i>
+                                {{ recommendation }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <h6 class="border-bottom pb-2 mb-3">Сравнение с конкурентами</h6>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Метрика</th>
+                                        <th>Ваш бренд</th>
+                                        <th>Конкуренты (в среднем)</th>
+                                        <th>Рекомендация</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for metric, your_brand, competitors, recommendation in competitors_data %}
+                                    <tr>
+                                        <td>{{ metric }}</td>
+                                        <td>{{ your_brand }}</td>
+                                        <td>{{ competitors }}</td>
+                                        <td>{{ recommendation }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-download me-2"></i>
+                    Экспорт SEO-отчета
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <a href="{{ url_for('export_seo_report') }}{{ '?' + request.query_string.decode() if request.query_string else '' }}" class="btn btn-success">
+                    <i class="fas fa-file-pdf me-2"></i>
+                    Скачать PDF-отчет
+                </a>
+                <a href="#" class="btn btn-primary mx-2">
+                    <i class="fas fa-file-excel me-2"></i>
+                    Скачать Excel-отчет
+                </a>
+                <a href="#" class="btn btn-info">
+                    <i class="fas fa-share-alt me-2"></i>
+                    Поделиться отчетом
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
