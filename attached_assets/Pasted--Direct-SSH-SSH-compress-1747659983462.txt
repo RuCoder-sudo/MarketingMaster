@@ -1,0 +1,104 @@
+    │   • Direct SSH      :  ✓                                             │
+    │   • SSH compression :  ✓                                             │
+    │   • SSH-browser     :  ✓                                             │
+    │   • X11-forwarding  :  ✗  (disabled or not supported by server)      │
+    │                                                                      │
+    │ ⮞ For more info, ctrl+click on help or visit our website.            │
+    └──────────────────────────────────────────────────────────────────────┘
+
+Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.2.0 x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+Last login: Mon May 19 12:44:00 2025 from 90.156.255.117
+root@f418b3c5b5c3:~# pkill gunicorn
+root@f418b3c5b5c3:~# ln -sf /etc/nginx/sites-available/multi_domains.conf /etc/nginx/sites-enabled/ rm -f /etc/nginx/sites-enabled/default nginx -t && systemctl restart nginx
+ln: option requires an argument -- 't'
+Try 'ln --help' for more information.
+root@f418b3c5b5c3:~# ln -sf /etc/nginx/sites-available/multi_domains.conf
+root@f418b3c5b5c3:~# /etc/nginx/sites-enabled/ rm -f
+-bash: /etc/nginx/sites-enabled/: Is a directory
+root@f418b3c5b5c3:~# /etc/nginx/sites-enabled/default nginx -t && systemctl restart nginx
+-bash: /etc/nginx/sites-enabled/default: No such file or directory
+root@f418b3c5b5c3:~# cd /root/telegram_web_tg_rucoder && gunicorn --workers 3 --bind 127.0.0.1:5001 main:app & cd /root/MarketingMaster && gunicorn --workers 3 --bind 127.0.0.1:5000 main:app &
+[1] 1111753
+[2] 1111754
+root@f418b3c5b5c3:~# -bash: line 6: cd: /root/telegram_web_tg_rucoder: No such file or directory
+[2025-05-19 12:59:21 +0000] [1111755] [INFO] Starting gunicorn 23.0.0
+[2025-05-19 12:59:21 +0000] [1111755] [INFO] Listening at: http://127.0.0.1:5000 (1111755)
+[2025-05-19 12:59:21 +0000] [1111755] [INFO] Using worker: sync
+[2025-05-19 12:59:21 +0000] [1111756] [INFO] Booting worker with pid: 1111756
+[2025-05-19 12:59:21 +0000] [1111757] [INFO] Booting worker with pid: 1111757
+[2025-05-19 12:59:21 +0000] [1111758] [INFO] Booting worker with pid: 1111758
+^C
+[1]-  Exit 1         # Остановим все процессы gunicorn pkill gunicorn # Перезапустим nginx nginx -t && systemctl restart nginx # Запустим приложение cd /root/telegram_web_tg_rucoder && gunicorn --workers 3 --bind 0.0.0.0:5000 main:app
+root@f418b3c5b5c3:~# gunicorn pkill
+[2025-05-19 13:00:44 +0000] [1112384] [INFO] Starting gunicorn 23.0.0
+[2025-05-19 13:00:44 +0000] [1112384] [INFO] Listening at: http://127.0.0.1:8000 (1112384)
+[2025-05-19 13:00:44 +0000] [1112384] [INFO] Using worker: sync
+[2025-05-19 13:00:44 +0000] [1112385] [INFO] Booting worker with pid: 1112385
+[2025-05-19 13:00:44 +0000] [1112385] [ERROR] Exception in worker process
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/gunicorn/arbiter.py", line 608, in spawn_worker
+    worker.init_process()
+  File "/usr/local/lib/python3.10/dist-packages/gunicorn/workers/base.py", line 135, in init_process
+    self.load_wsgi()
+  File "/usr/local/lib/python3.10/dist-packages/gunicorn/workers/base.py", line 147, in load_wsgi
+    self.wsgi = self.app.wsgi()
+  File "/usr/local/lib/python3.10/dist-packages/gunicorn/app/base.py", line 66, in wsgi
+    self.callable = self.load()
+  File "/usr/local/lib/python3.10/dist-packages/gunicorn/app/wsgiapp.py", line 57, in load
+    return self.load_wsgiapp()
+  File "/usr/local/lib/python3.10/dist-packages/gunicorn/app/wsgiapp.py", line 47, in load_wsgiapp
+    return util.import_app(self.app_uri)
+  File "/usr/local/lib/python3.10/dist-packages/gunicorn/util.py", line 370, in import_app
+    mod = importlib.import_module(module)
+  File "/usr/lib/python3.10/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1004, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'pkill'
+[2025-05-19 13:00:44 +0000] [1112385] [INFO] Worker exiting (pid: 1112385)
+[2025-05-19 13:00:44 +0000] [1112384] [ERROR] Worker (pid:1112385) exited with code 3
+[2025-05-19 13:00:44 +0000] [1112384] [ERROR] Shutting down: Master
+[2025-05-19 13:00:44 +0000] [1112384] [ERROR] Reason: Worker failed to boot.
+root@f418b3c5b5c3:~# gunicorn pkill gunicorn
+[2025-05-19 13:00:52 +0000] [1112451] [INFO] Starting gunicorn 23.0.0
+[2025-05-19 13:00:52 +0000] [1112451] [INFO] Listening at: http://127.0.0.1:8000 (1112451)
+[2025-05-19 13:00:52 +0000] [1112451] [INFO] Using worker: sync
+[2025-05-19 13:00:52 +0000] [1112452] [INFO] Booting worker with pid: 1112452
+[2025-05-19 13:00:52 +0000] [1112452] [ERROR] Exception in worker process
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/gunicorn/arbiter.py", line 608, in spawn_worker
+    worker.init_process()
+  File "/usr/local/lib/python3.10/dist-packages/gunicorn/workers/base.py", line 135, in init_process
+    self.load_wsgi()
+  File "/usr/local/lib/python3.10/dist-packages/gunicorn/workers/base.py", line 147, in load_wsgi
+    self.wsgi = self.app.wsgi()
+  File "/usr/local/lib/python3.10/dist-packages/gunicorn/app/base.py", line 66, in wsgi
+    self.callable = self.load()
+  File "/usr/local/lib/python3.10/dist-packages/gunicorn/app/wsgiapp.py", line 57, in load
+    return self.load_wsgiapp()
+  File "/usr/local/lib/python3.10/dist-packages/gunicorn/app/wsgiapp.py", line 47, in load_wsgiapp
+    return util.import_app(self.app_uri)
+  File "/usr/local/lib/python3.10/dist-packages/gunicorn/util.py", line 370, in import_app
+    mod = importlib.import_module(module)
+  File "/usr/lib/python3.10/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1004, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'pkill'
+[2025-05-19 13:00:52 +0000] [1112452] [INFO] Worker exiting (pid: 1112452)
+[2025-05-19 13:00:52 +0000] [1112451] [ERROR] Worker (pid:1112452) exited with code 3
+[2025-05-19 13:00:52 +0000] [1112451] [ERROR] Shutting down: Master
+[2025-05-19 13:00:52 +0000] [1112451] [ERROR] Reason: Worker failed to boot.
+root@f418b3c5b5c3:~# nginx -t && systemctl restart nginx
+nginx: [emerg] cannot load certificate "/etc/letsencrypt/live/rucoderweb.website/fullchain.pem": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/letsencrypt/live/rucoderweb.website/fullchain.pem, r) error:10000080:BIO routines::no such file)
+nginx: configuration file /etc/nginx/nginx.conf test failed
+root@f418b3c5b5c3:~# cd /root/telegram_web_tg_rucoder && gunicorn --workers 3 --bind 0.0.0.0:5000 main:app
+-bash: cd: /root/telegram_web_tg_rucoder: No such file or directory
+root@f418b3c5b5c3:~# ^C
+root@f418b3c5b5c3:~#
