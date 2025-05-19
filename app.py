@@ -1214,6 +1214,199 @@ def set_active_project(project_id):
     
     return redirect(request.referrer or url_for('index'))
 
+# Маршруты для работы с тегами
+@app.route('/tags', methods=['GET', 'POST'])
+def tags():
+    active_project = get_active_project()
+    
+    if request.method == 'POST':
+        tag_name = request.form.get('tag_name')
+        tag_color = request.form.get('tag_color', '#6c757d')  # Default color
+        
+        if tag_name:
+            new_tag = Tag(
+                project_id=active_project.id,
+                name=tag_name,
+                color=tag_color
+            )
+            db.session.add(new_tag)
+            db.session.commit()
+            
+            save_log(f"Создан новый тег: {tag_name}", level="INFO")
+            flash(f'Тег "{tag_name}" успешно создан!', 'success')
+        
+        return redirect(url_for('tags'))
+    
+    tags = Tag.query.filter_by(project_id=active_project.id).order_by(Tag.name).all()
+    
+    return render_template('tags.html', 
+                          active_project=active_project,
+                          tags=tags)
+
+@app.route('/delete_tag/<int:tag_id>', methods=['POST'])
+def delete_tag(tag_id):
+    active_project = get_active_project()
+    tag = Tag.query.get(tag_id)
+    
+    if tag and tag.project_id == active_project.id:
+        tag_name = tag.name
+        db.session.delete(tag)
+        db.session.commit()
+        
+        save_log(f"Удален тег: {tag_name}", level="INFO")
+        flash(f'Тег "{tag_name}" успешно удален!', 'success')
+    
+    return redirect(url_for('tags'))
+
+@app.route('/add_tag_to_mention/<int:mention_id>/<int:tag_id>', methods=['POST'])
+def add_tag_to_mention(mention_id, tag_id):
+    active_project = get_active_project()
+    mention = Mention.query.get(mention_id)
+    tag = Tag.query.get(tag_id)
+    
+    if mention and tag and mention.project_id == active_project.id and tag.project_id == active_project.id:
+        if tag not in mention.tags:
+            mention.tags.append(tag)
+            db.session.commit()
+            
+            save_log(f"Добавлен тег '{tag.name}' к упоминанию #{mention.id}", level="INFO")
+            flash(f'Тег "{tag.name}" успешно добавлен к упоминанию!', 'success')
+    
+    return redirect(request.referrer or url_for('search'))
+
+@app.route('/remove_tag_from_mention/<int:mention_id>/<int:tag_id>', methods=['POST'])
+def remove_tag_from_mention(mention_id, tag_id):
+    active_project = get_active_project()
+    mention = Mention.query.get(mention_id)
+    tag = Tag.query.get(tag_id)
+    
+    if mention and tag and mention.project_id == active_project.id and tag.project_id == active_project.id:
+        if tag in mention.tags:
+            mention.tags.remove(tag)
+            db.session.commit()
+            
+            save_log(f"Удален тег '{tag.name}' из упоминания #{mention.id}", level="INFO")
+            flash(f'Тег "{tag.name}" успешно удален из упоминания!', 'success')
+    
+    return redirect(request.referrer or url_for('search'))
+
+# Маршруты для работы с семантическим ядром
+@app.route('/semantic_core', methods=['GET', 'POST'])
+def semantic_core():
+    active_project = get_active_project()
+    
+    if request.method == 'POST':
+        keyword = request.form.get('keyword')
+        frequency = request.form.get('frequency', 0, type=int)
+        difficulty = request.form.get('difficulty', 0.0, type=float)
+        relevance = request.form.get('relevance', 0.0, type=float)
+        source = request.form.get('source', 'Manual')
+        
+        if keyword:
+            new_keyword = SearchKeyword(
+                project_id=active_project.id,
+                keyword=keyword,
+                frequency=frequency,
+                difficulty=difficulty,
+                relevance=relevance,
+                source=source
+            )
+            db.session.add(new_keyword)
+            db.session.commit()
+            
+            save_log(f"Добавлено ключевое слово в семантическое ядро: {keyword}", level="INFO")
+            flash(f'Ключевое слово "{keyword}" успешно добавлено в семантическое ядро!', 'success')
+        
+        return redirect(url_for('semantic_core'))
+    
+    keywords = SearchKeyword.query.filter_by(project_id=active_project.id).order_by(SearchKeyword.frequency.desc()).all()
+    
+    return render_template('semantic_core.html', 
+                          active_project=active_project,
+                          keywords=keywords)
+
+@app.route('/delete_semantic_keyword/<int:keyword_id>', methods=['POST'])
+def delete_semantic_keyword(keyword_id):
+    active_project = get_active_project()
+    keyword = SearchKeyword.query.get(keyword_id)
+    
+    if keyword and keyword.project_id == active_project.id:
+        keyword_name = keyword.keyword
+        db.session.delete(keyword)
+        db.session.commit()
+        
+        save_log(f"Удалено ключевое слово из семантического ядра: {keyword_name}", level="INFO")
+        flash(f'Ключевое слово "{keyword_name}" успешно удалено из семантического ядра!', 'success')
+    
+    return redirect(url_for('semantic_core'))
+
+@app.route('/analyze_competitors', methods=['POST'])
+def analyze_competitors():
+    active_project = get_active_project()
+    
+    competitor_url = request.form.get('competitor_url')
+    
+    if competitor_url:
+        try:
+            # Получаем текстовый контент с веб-страницы
+            content = get_website_text_content(competitor_url)
+            
+            if content:
+                # Анализ частоты слов
+                import re
+                from collections import Counter
+                
+                # Очищаем текст и разбиваем на слова
+                words = re.findall(r'\b[а-яёА-ЯЁa-zA-Z]{3,}\b', content.lower())
+                
+                # Исключаем стоп-слова
+                stop_words = {'и', 'в', 'на', 'с', 'по', 'для', 'не', 'от', 'к', 'за', 'the', 'and', 'a', 'to', 'of', 'is', 'in', 'for', 'that', 'on'}
+                filtered_words = [word for word in words if word not in stop_words]
+                
+                # Подсчитываем частоту
+                word_counts = Counter(filtered_words)
+                
+                # Выбираем самые популярные слова (топ-20)
+                popular_words = word_counts.most_common(20)
+                
+                # Добавляем в семантическое ядро
+                for word, count in popular_words:
+                    if len(word) > 3:  # Дополнительная фильтрация коротких слов
+                        # Проверяем, есть ли уже такое ключевое слово
+                        existing_keyword = SearchKeyword.query.filter_by(
+                            project_id=active_project.id, 
+                            keyword=word
+                        ).first()
+                        
+                        if existing_keyword:
+                            # Обновляем частоту
+                            existing_keyword.frequency += count
+                            existing_keyword.updated_at = datetime.utcnow()
+                        else:
+                            # Создаем новое ключевое слово
+                            new_keyword = SearchKeyword(
+                                project_id=active_project.id,
+                                keyword=word,
+                                frequency=count,
+                                difficulty=0.5,  # Средняя сложность по умолчанию
+                                relevance=0.7,   # Средняя релевантность по умолчанию
+                                source=f"Competitor: {competitor_url}"
+                            )
+                            db.session.add(new_keyword)
+                
+                db.session.commit()
+                
+                save_log(f"Проведен анализ конкурента: {competitor_url}, добавлено {len(popular_words)} ключевых слов", level="INFO")
+                flash(f'Анализ конкурента успешно завершен! Добавлено {len(popular_words)} ключевых слов.', 'success')
+            else:
+                flash('Не удалось получить содержимое с указанного URL', 'danger')
+        
+        except Exception as e:
+            save_log(f"Ошибка при анализе конкурента: {str(e)}", level="ERROR")
+            flash(f'Ошибка при анализе конкурента: {str(e)}', 'danger')
+    
+    return redirect(url_for('semantic_core'))
+
 # Initialize the database with app context
 with app.app_context():
     # Create all tables

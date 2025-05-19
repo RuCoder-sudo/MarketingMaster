@@ -27,6 +27,48 @@
             <p>{{ mention.highlighted_content|safe }}</p>
         </div>
         
+        <!-- Tags section -->
+        <div class="mention-tags mb-2">
+            {% if mention.tags.all() %}
+                <div class="mb-2">
+                    {% for tag in mention.tags %}
+                        <span class="badge" style="background-color: {{ tag.color }}">
+                            {{ tag.name }}
+                            <a href="#" class="text-white ms-1" 
+                               onclick="document.getElementById('remove-tag-form-{{ mention.id }}-{{ tag.id }}').submit(); return false;">
+                                <i class="fas fa-times"></i>
+                            </a>
+                            <form id="remove-tag-form-{{ mention.id }}-{{ tag.id }}" 
+                                  action="{{ url_for('remove_tag_from_mention', mention_id=mention.id, tag_id=tag.id) }}" 
+                                  method="POST" style="display: none;"></form>
+                        </span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="addTagDropdown{{ mention.id }}" 
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-tag me-1"></i> Добавить тег
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="addTagDropdown{{ mention.id }}">
+                    {% for tag in tags %}
+                        {% if tag not in mention.tags %}
+                            <li>
+                                <form action="{{ url_for('add_tag_to_mention', mention_id=mention.id, tag_id=tag.id) }}" method="POST">
+                                    <button type="submit" class="dropdown-item">
+                                        <span class="badge" style="background-color: {{ tag.color }}">{{ tag.name }}</span>
+                                    </button>
+                                </form>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ url_for('tags') }}">Управление тегами</a></li>
+                </ul>
+            </div>
+        </div>
+
         <!-- Footer with author information and found date -->
         <div class="d-flex justify-content-between align-items-center">
             <div>

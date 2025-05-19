@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}Семантическое ядро{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Семантическое ядро</h1>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Добавить ключевое слово</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('semantic_core') }}">
+                        <div class="mb-3">
+                            <label for="keyword" class="form-label">Ключевое слово</label>
+                            <input type="text" class="form-control" id="keyword" name="keyword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="frequency" class="form-label">Частота (запросов в месяц)</label>
+                            <input type="number" class="form-control" id="frequency" name="frequency" min="0" value="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="difficulty" class="form-label">Сложность (от 0 до 1)</label>
+                            <input type="range" class="form-range" id="difficulty" name="difficulty" min="0" max="1" step="0.1" value="0.5">
+                            <div class="d-flex justify-content-between">
+                                <small>Легко</small>
+                                <small>Сложно</small>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="relevance" class="form-label">Релевантность (от 0 до 1)</label>
+                            <input type="range" class="form-range" id="relevance" name="relevance" min="0" max="1" step="0.1" value="0.7">
+                            <div class="d-flex justify-content-between">
+                                <small>Низкая</small>
+                                <small>Высокая</small>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="source" class="form-label">Источник</label>
+                            <input type="text" class="form-control" id="source" name="source" value="Manual">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Добавить ключевое слово</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Анализировать конкурентов</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('analyze_competitors') }}">
+                        <div class="mb-3">
+                            <label for="competitor_url" class="form-label">URL конкурента</label>
+                            <input type="url" class="form-control" id="competitor_url" name="competitor_url" required 
+                                   placeholder="https://example.com">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Проанализировать</button>
+                    </form>
+                    <small class="text-muted mt-2">
+                        Система автоматически проанализирует содержимое сайта конкурента и извлечет ключевые слова.
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Ключевые слова</h5>
+                    <span class="badge bg-primary">{{ keywords|length }}</span>
+                </div>
+                <div class="card-body">
+                    {% if keywords %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Ключевое слово</th>
+                                    <th>Частота</th>
+                                    <th>Сложность</th>
+                                    <th>Релевантность</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for keyword in keywords %}
+                                <tr>
+                                    <td>{{ keyword.keyword }}</td>
+                                    <td>{{ keyword.frequency }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 10px;">
+                                            <div class="progress-bar {% if keyword.difficulty < 0.4 %}bg-success{% elif keyword.difficulty < 0.7 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                                 role="progressbar" 
+                                                 style="width: {{ keyword.difficulty * 100 }}%;" 
+                                                 aria-valuenow="{{ keyword.difficulty * 100 }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100"></div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 10px;">
+                                            <div class="progress-bar bg-info" 
+                                                 role="progressbar" 
+                                                 style="width: {{ keyword.relevance * 100 }}%;" 
+                                                 aria-valuenow="{{ keyword.relevance * 100 }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100"></div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('delete_semantic_keyword', keyword_id=keyword.id) }}" style="display: inline;">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Вы уверены, что хотите удалить это ключевое слово?')">Удалить</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> У вас пока нет ключевых слов в семантическом ядре. Добавьте их с помощью формы слева.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <h3>Использование семантического ядра</h3>
+        <p>Семантическое ядро — это набор ключевых слов, которые наиболее полно описывают вашу тематику.</p>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Зачем нужно семантическое ядро?</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Понимание основных запросов целевой аудитории</li>
+                            <li>Оптимизация контента для поисковых систем</li>
+                            <li>Определение потенциальных тем для публикаций</li>
+                            <li>Анализ конкурентов и рыночных тенденций</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Как использовать семантическое ядро?</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Добавляйте ключевые слова вручную или через анализ конкурентов</li>
+                            <li>Отслеживайте частоту запросов для оценки популярности</li>
+                            <li>Используйте показатели сложности для приоритизации работы</li>
+                            <li>Включайте наиболее релевантные ключевые слова в контент</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
