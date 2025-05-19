@@ -452,7 +452,7 @@ def search():
             mentions = Mention.query.filter_by(project_id=active_project.id).all()
             
             if not mentions:
-                flash('No data to export!', 'warning')
+                flash('Нет данных для экспорта!', 'warning')
                 return redirect(url_for('search'))
             
             # Create DataFrame
@@ -480,13 +480,29 @@ def search():
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             filename = f"mentions_{active_project.name}_{timestamp}.csv"
             
-            save_log(f"Exported data to CSV for project {active_project.name}")
+            save_log(f"Данные экспортированы в CSV для проекта {active_project.name}")
             return send_file(
                 output,
                 mimetype='text/csv',
                 download_name=filename,
                 as_attachment=True
             )
+            
+        elif action == 'clear_all_mentions':
+            # Очистка всех упоминаний для текущего проекта
+            mentions_count = Mention.query.filter_by(project_id=active_project.id).count()
+            
+            if mentions_count == 0:
+                flash('Нет упоминаний для удаления!', 'warning')
+                return redirect(url_for('search'))
+            
+            # Удаляем все упоминания для текущего проекта
+            Mention.query.filter_by(project_id=active_project.id).delete()
+            db.session.commit()
+            
+            save_log(f"Очищены все упоминания ({mentions_count}) для проекта {active_project.name}", level="WARNING")
+            flash(f'Успешно удалено {mentions_count} упоминаний!', 'success')
+            return redirect(url_for('search'))
         
         return redirect(url_for('search'))
     
