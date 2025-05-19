@@ -45,11 +45,12 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 
 # Import components after initializing db to avoid circular imports
-from models import Project, Settings, Keyword, Mention, Log
+from models import Project, Settings, Keyword, Mention, Log, Tag, SearchKeyword
 from social_api import search_vk, search_ok, search_telegram, search_instagram, search_kwork_ru
 from notifications import send_notifications
 from background_tasks import BackgroundSearcher
 from utils import highlight_text, get_active_project, save_log
+from web_scraper import get_website_text_content
 
 # Initialize background searcher
 background_searcher = BackgroundSearcher()

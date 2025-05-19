@@ -1,5 +1,13 @@
 from datetime import datetime
 from app import db
+from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy import Table, Column, Integer, ForeignKey
+
+# Определяем таблицу связи многие-ко-многим между Mention и Tag
+mention_tags = db.Table('mention_tags',
+    db.Column('mention_id', db.Integer, db.ForeignKey('mention.id'), primary_key=True),
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True)
+)
 
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -94,3 +102,33 @@ class Log(db.Model):
     
     def __repr__(self):
         return f'<Log {self.id}: {self.level} - {self.message[:20]}>'
+
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    name = db.Column(db.String(50), nullable=False)
+    color = db.Column(db.String(20), default='#6c757d')  # Default color
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Отношения
+    mentions = db.relationship('Mention', secondary=mention_tags, backref=db.backref('tags', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f'<Tag {self.name}>'
+
+class SearchKeyword(db.Model):
+    """Модель для хранения поисковых запросов из семантического ядра"""
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    keyword = db.Column(db.String(200), nullable=False)
+    frequency = db.Column(db.Integer, default=0)  # Частота поиска
+    difficulty = db.Column(db.Float, default=0.0)  # Сложность (от 0 до 1)
+    relevance = db.Column(db.Float, default=0.0)  # Релевантность (от 0 до 1)
+    source = db.Column(db.String(50))  # Источник данных (например, "Google", "Yandex", "Manual")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<SearchKeyword {self.keyword}>'
+        
+# Удалено: определение таблицы находится вверху файла
