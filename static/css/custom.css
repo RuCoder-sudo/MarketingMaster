@@ -334,17 +334,20 @@
 
 [data-bs-theme="light"] .navbar-dark .nav-link,
 [data-bs-theme="light"] .navbar-dark .navbar-brand {
-    color: rgba(255, 255, 255, 0.9) !important;
+    color: #ffffff !important;
 }
 
 [data-bs-theme="light"] .navbar-dark .nav-link:hover,
 [data-bs-theme="light"] .navbar-dark .navbar-brand:hover {
-    color: #fff !important;
+    color: #ffffff !important;
 }
 
 [data-bs-theme="light"] footer.bg-dark {
     background-color: #343a40 !important;
-    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-bs-theme="light"] footer.bg-dark * {
+    color: #ffffff !important;
 }
 
 /* Улучшенные стили для карточек в светлом режиме */

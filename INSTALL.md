@@ -14,6 +14,9 @@
 11. [Настройка SSL с Let's Encrypt](#настройка-ssl-с-lets-encrypt)
 12. [Проверка работоспособности](#проверка-работоспособности)
 13. [Решение возможных проблем](#решение-возможных-проблем)
+14. [Обновление системы](#обновление-системы)
+15. [Резервное копирование](#резервное-копирование)
+16. [Быстрая установка (скрипт)](#быстрая-установка-скрипт)
 
 ## Требования
 - Сервер под управлением Debian/Ubuntu/CentOS
@@ -366,6 +369,10 @@ BACKUP_DIR="/var/www/backups"
 TIMESTAMP=\$(date +"%Y%m%d_%H%M%S")
 mkdir -p \$BACKUP_DIR
 pg_dump -U marketingmaster -d marketingmaster -h localhost > "\$BACKUP_DIR/marketingmaster_\$TIMESTAMP.sql"
+# Сжимаем бэкап
+gzip "\$BACKUP_DIR/marketingmaster_\$TIMESTAMP.sql"
+# Удаляем бэкапы старше 30 дней
+find \$BACKUP_DIR -name "marketingmaster_*.sql.gz" -type f -mtime +30 -delete
 EOL
 
 chmod +x /var/www/backup_database.sh
@@ -378,6 +385,323 @@ chmod +x /var/www/backup_database.sh
 
 Рассмотрите установку системы мониторинга, например, Prometheus + Grafana, для отслеживания работы приложения.
 
+## Обновление системы
+
+Регулярно обновляйте систему и зависимости для поддержания безопасности и стабильности:
+
+```bash
+# Обновление системы
+apt update && apt upgrade -y
+
+# Обновление кода из репозитория
+cd /var/www/MarketingMaster
+git pull
+
+# Обновление зависимостей Python
+source venv/bin/activate
+pip install --upgrade email-validator flask flask-sqlalchemy gunicorn pandas psycopg2-binary requests sendgrid sqlalchemy trafilatura werkzeug
+
+# Перезапуск службы
+systemctl restart marketingmaster.service
+```
+
+Рекомендуется выполнять обновление системы не реже одного раза в месяц.
+
+## Резервное копирование
+
+Помимо базы данных, рекомендуется создавать резервные копии всего проекта:
+
+```bash
+# Создание полной резервной копии проекта
+BACKUP_DIR="/var/www/backups"
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+mkdir -p $BACKUP_DIR
+
+# Резервное копирование кода и конфигурации
+tar -czf "$BACKUP_DIR/marketingmaster_full_$TIMESTAMP.tar.gz" -C /var/www MarketingMaster
+
+# Резервное копирование конфигурации Nginx
+cp /etc/nginx/sites-available/marketingmaster.conf "$BACKUP_DIR/nginx_conf_$TIMESTAMP.conf"
+
+# Резервное копирование системной службы
+cp /etc/systemd/system/marketingmaster.service "$BACKUP_DIR/systemd_service_$TIMESTAMP.service"
+```
+
+## Быстрая установка (скрипт)
+
+Вы можете использовать следующий скрипт для автоматической установки MarketingMaster на вашем сервере. Сохраните его в файл `install_marketingmaster.sh` и запустите на вашем сервере:
+
+```bash
+#!/bin/bash
+
+# Быстрая установка MarketingMaster
+# Использование: ./install_marketingmaster.sh <доменное_имя> <пароль_для_бд>
+
+# Проверка параметров
+if [ $# -lt 2 ]; then
+    echo "Использование: $0 <доменное_имя> <пароль_для_бд>"
+    echo "Пример: $0 marketingmaster.space mySecurePassword123"
+    exit 1
+fi
+
+DOMAIN=$1
+DB_PASSWORD=$2
+APP_DIR="/var/www/MarketingMaster"
+SECRET_KEY=$(openssl rand -hex 24)  # Генерация случайного ключа
+
+echo "Начало установки MarketingMaster на $DOMAIN..."
+
+# 1. Обновление системы и установка необходимых пакетов
+echo "Обновление системы и установка пакетов..."
+apt update
+apt upgrade -y
+apt install -y python3 python3-pip python3-venv git nginx postgresql postgresql-contrib python3-dev libpq-dev certbot python3-certbot-nginx
+
+# 2. Создание директории и клонирование репозитория
+echo "Клонирование репозитория..."
+mkdir -p /var/www
+cd /var/www
+git clone https://github.com/RuCoder-sudo/MarketingMaster.git || { echo "Ошибка при клонировании репозитория"; exit 1; }
+cd MarketingMaster
+
+# 3. Создание и настройка виртуального окружения Python
+echo "Настройка окружения Python..."
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install email-validator flask flask-sqlalchemy gunicorn pandas psycopg2-binary requests sendgrid sqlalchemy trafilatura werkzeug
+
+# 4. Настройка PostgreSQL
+echo "Настройка базы данных PostgreSQL..."
+sudo -u postgres psql -c "CREATE USER marketingmaster WITH PASSWORD '$DB_PASSWORD';"
+sudo -u postgres psql -c "CREATE DATABASE marketingmaster OWNER marketingmaster;"
+sudo -u postgres psql -c "ALTER USER marketingmaster WITH SUPERUSER;"
+
+# 5. Создание файла .env с настройками
+echo "Создание файла конфигурации..."
+cat > $APP_DIR/.env << EOL
+FLASK_APP=main.py
+FLASK_ENV=production
+SESSION_SECRET=$SECRET_KEY
+DATABASE_URL=postgresql://marketingmaster:$DB_PASSWORD@localhost/marketingmaster
+EOL
+chmod 600 $APP_DIR/.env
+
+# 6. Настройка Nginx
+echo "Настройка Nginx..."
+cat > /etc/nginx/sites-available/marketingmaster.conf << EOL
+server {
+    listen 80;
+    server_name $DOMAIN www.$DOMAIN;
+
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location /static {
+        alias $APP_DIR/static;
+        expires 30d;
+    }
+}
+EOL
+
+ln -s /etc/nginx/sites-available/marketingmaster.conf /etc/nginx/sites-enabled/
+rm -f /etc/nginx/sites-enabled/default
+nginx -t || { echo "Ошибка в конфигурации Nginx"; exit 1; }
+systemctl restart nginx
+
+# 7. Настройка Gunicorn как системной службы
+echo "Настройка системной службы Gunicorn..."
+cat > /etc/systemd/system/marketingmaster.service << EOL
+[Unit]
+Description=MarketingMaster Gunicorn Service
+After=network.target postgresql.service
+
+[Service]
+User=root
+Group=www-data
+WorkingDirectory=$APP_DIR
+Environment="PATH=$APP_DIR/venv/bin"
+EnvironmentFile=$APP_DIR/.env
+ExecStart=$APP_DIR/venv/bin/gunicorn --bind 0.0.0.0:5000 --workers 4 --reuse-port --reload main:app
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOL
+
+systemctl daemon-reload
+systemctl enable marketingmaster.service
+systemctl start marketingmaster.service
+
+# 8. Настройка SSL с Let's Encrypt
+echo "Настройка SSL-сертификата..."
+certbot --nginx -d $DOMAIN -d www.$DOMAIN
+
+# 9. Проверка состояния службы
+echo "Проверка состояния службы..."
+systemctl status marketingmaster.service
+
+# 10. Создание скриптов для обслуживания
+echo "Создание скриптов обслуживания..."
+
+# Скрипт обновления
+cat > /var/www/update_marketingmaster.sh << EOL
+#!/bin/bash
+cd $APP_DIR
+git pull
+source venv/bin/activate
+pip install -r requirements.txt
+systemctl restart marketingmaster.service
+EOL
+chmod +x /var/www/update_marketingmaster.sh
+
+# Скрипт резервного копирования
+cat > /var/www/backup_marketingmaster.sh << EOL
+#!/bin/bash
+BACKUP_DIR="/var/www/backups"
+TIMESTAMP=\$(date +"%Y%m%d_%H%M%S")
+mkdir -p \$BACKUP_DIR
+
+# Резервное копирование базы данных
+PGPASSWORD="$DB_PASSWORD" pg_dump -U marketingmaster -d marketingmaster -h localhost > "\$BACKUP_DIR/marketingmaster_\$TIMESTAMP.sql"
+gzip "\$BACKUP_DIR/marketingmaster_\$TIMESTAMP.sql"
+
+# Резервное копирование кода
+tar -czf "\$BACKUP_DIR/marketingmaster_code_\$TIMESTAMP.tar.gz" -C /var/www MarketingMaster
+
+# Удаление старых бэкапов (старше 30 дней)
+find \$BACKUP_DIR -name "marketingmaster_*.sql.gz" -type f -mtime +30 -delete
+find \$BACKUP_DIR -name "marketingmaster_code_*.tar.gz" -type f -mtime +30 -delete
+EOL
+chmod +x /var/www/backup_marketingmaster.sh
+
+# Добавление задания в cron для ежедневного резервного копирования
+(crontab -l 2>/dev/null; echo "0 2 * * * /var/www/backup_marketingmaster.sh") | crontab -
+
+echo "Установка MarketingMaster успешно завершена!"
+echo "Ваше приложение доступно по адресу: https://$DOMAIN"
+echo ""
+echo "Полезные команды:"
+echo "  - Перезапуск приложения: systemctl restart marketingmaster.service"
+echo "  - Просмотр логов: journalctl -u marketingmaster.service -f"
+echo "  - Обновление приложения: /var/www/update_marketingmaster.sh"
+echo "  - Резервное копирование: /var/www/backup_marketingmaster.sh"
+```
+
+Сделайте файл исполняемым и запустите его:
+
+```bash
+chmod +x install_marketingmaster.sh
+./install_marketingmaster.sh marketingmaster.space ВАША_СЕКРЕТНАЯ_СТРОКА
+```
+
+Этот скрипт автоматически выполнит все шаги установки и настройки, описанные в этой инструкции.
+
+## Настройка защиты от атак и оптимизация производительности
+
+Для защиты вашего сервера от атак и улучшения производительности рекомендуется:
+
+### 1. Установить и настроить Fail2ban
+
+```bash
+# Установка Fail2ban
+apt install -y fail2ban
+
+# Настройка защиты SSH
+cat > /etc/fail2ban/jail.local << EOL
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 5
+findtime = 600
+bantime = 3600
+EOL
+
+# Перезапуск службы
+systemctl restart fail2ban
+```
+
+### 2. Оптимизировать Nginx
+
+```bash
+# Редактирование конфигурации Nginx
+cat > /etc/nginx/conf.d/optimization.conf << EOL
+# Оптимизация буферов
+client_body_buffer_size 10K;
+client_header_buffer_size 1k;
+client_max_body_size 8m;
+large_client_header_buffers 2 1k;
+
+# Таймауты
+client_body_timeout 12;
+client_header_timeout 12;
+keepalive_timeout 15;
+send_timeout 10;
+
+# Сжатие gzip
+gzip on;
+gzip_comp_level 5;
+gzip_min_length 256;
+gzip_proxied any;
+gzip_vary on;
+gzip_types
+  application/atom+xml
+  application/javascript
+  application/json
+  application/ld+json
+  application/manifest+json
+  application/rss+xml
+  application/vnd.geo+json
+  application/vnd.ms-fontobject
+  application/x-font-ttf
+  application/x-web-app-manifest+json
+  application/xhtml+xml
+  application/xml
+  font/opentype
+  image/bmp
+  image/svg+xml
+  image/x-icon
+  text/cache-manifest
+  text/css
+  text/plain
+  text/vcard
+  text/vnd.rim.location.xloc
+  text/vtt
+  text/x-component
+  text/x-cross-domain-policy;
+EOL
+
+# Перезапуск Nginx
+systemctl restart nginx
+```
+
+### 3. Оптимизировать PostgreSQL
+
+```bash
+# Редактирование конфигурации PostgreSQL
+cat > /etc/postgresql/*/main/conf.d/optimization.conf << EOL
+# Настройки памяти
+shared_buffers = 256MB
+work_mem = 8MB
+maintenance_work_mem = 64MB
+
+# Настройки WAL
+wal_buffers = 8MB
+checkpoint_completion_target = 0.9
+EOL
+
+# Перезапуск PostgreSQL
+systemctl restart postgresql
+```
+
 ---
 
-Эта инструкция содержит все необходимые шаги для установки и настройки MarketingMaster на вашем сервере. В случае возникновения проблем или вопросов, обратитесь к документации или обратитесь за поддержкой.
+Эта инструкция содержит все необходимые шаги для установки и настройки MarketingMaster на вашем сервере Jino VPS (f418b3c5b5c3). В случае возникновения проблем или вопросов, обратитесь к документации или обратитесь за поддержкой.
