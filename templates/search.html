@@ -209,7 +209,7 @@
                         <ul class="pagination justify-content-center">
                             {% if mentions.has_prev %}
                                 <li class="page-item">
-                                    <a class="page-link" href="{{ url_for('search', page=mentions.prev_num, keyword=keyword_filter, social_network=social_network_filter) }}">
+                                    <a class="page-link" href="{{ url_for('search', page=mentions.prev_num, keyword=keyword_filter, social_network=social_network_filter, tag_id=request.args.get('tag_id')) }}">
                                         <i class="fas fa-chevron-left"></i> Предыдущая
                                     </a>
                                 </li>
@@ -227,7 +227,7 @@
                                         </li>
                                     {% else %}
                                         <li class="page-item">
-                                            <a class="page-link" href="{{ url_for('search', page=page_num, keyword=keyword_filter, social_network=social_network_filter) }}">{{ page_num }}</a>
+                                            <a class="page-link" href="{{ url_for('search', page=page_num, keyword=keyword_filter, social_network=social_network_filter, tag_id=request.args.get('tag_id')) }}">{{ page_num }}</a>
                                         </li>
                                     {% endif %}
                                 {% else %}

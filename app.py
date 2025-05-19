@@ -521,6 +521,14 @@ def search():
     social_network_filter = request.args.get('social_network')
     if social_network_filter:
         mentions_query = mentions_query.filter_by(social_network=social_network_filter)
+        
+    # Фильтр по тегам
+    tag_filter = request.args.get('tag_id', type=int)
+    if tag_filter:
+        tag = Tag.query.get(tag_filter)
+        if tag and tag.project_id == active_project.id:
+            from models import mention_tags  # Импортируем таблицу связи
+            mentions_query = mentions_query.join(mention_tags).join(Tag).filter(Tag.id == tag_filter)
     
     # Order by date
     mentions_query = mentions_query.order_by(Mention.post_date.desc())
@@ -532,13 +540,17 @@ def search():
     for mention in mentions_page.items:
         mention.highlighted_content = highlight_text(mention.content, keywords)
     
+    # Получаем теги для текущего проекта
+    tags = Tag.query.filter_by(project_id=active_project.id).order_by(Tag.name).all()
+    
     return render_template('search.html', 
                           active_project=active_project,
                           keywords=keywords,
                           mentions=mentions_page,
                           background_active=background_searcher.is_running(),
                           keyword_filter=keyword_filter,
-                          social_network_filter=social_network_filter)
+                          social_network_filter=social_network_filter,
+                          tags=tags)
 
 @app.route('/logs')
 def logs():

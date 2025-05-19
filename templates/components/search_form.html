@@ -1,13 +1,13 @@
 <!-- Форма фильтрации для просмотра результатов -->
 <form id="filter-form" method="get" action="{{ url_for('search') }}" class="mb-4 search-controls">
     <div class="row">
-        <div class="col-md-6 mb-2">
+        <div class="col-md-4 mb-2">
             <div class="input-group">
                 <span class="input-group-text">Фильтр по слову</span>
                 <input type="text" class="form-control" name="keyword" value="{{ keyword_filter or '' }}" placeholder="Введите слово">
             </div>
         </div>
-        <div class="col-md-4 mb-2">
+        <div class="col-md-3 mb-2">
             <div class="input-group">
                 <span class="input-group-text">Соцсеть</span>
                 <select class="form-select" name="social_network">
@@ -17,6 +17,19 @@
                     <option value="telegram" {% if social_network_filter == 'telegram' %}selected{% endif %}>Telegram</option>
                     <option value="instagram" {% if social_network_filter == 'instagram' %}selected{% endif %}>Instagram</option>
                     <option value="kwork.ru" {% if social_network_filter == 'kwork.ru' %}selected{% endif %}>Kwork.ru</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <div class="input-group">
+                <span class="input-group-text">Тег</span>
+                <select class="form-select" name="tag_id">
+                    <option value="">Все теги</option>
+                    {% for tag in tags %}
+                    <option value="{{ tag.id }}" {% if request.args.get('tag_id')|int == tag.id %}selected{% endif %}>
+                        {{ tag.name }}
+                    </option>
+                    {% endfor %}
                 </select>
             </div>
         </div>
