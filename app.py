@@ -570,6 +570,125 @@ def export_logs():
         as_attachment=True
     )
 
+@app.route('/export/pdf')
+def export_pdf():
+    """Экспортировать данные о мониторинге в PDF отчет"""
+    from datetime import timedelta
+    import weasyprint
+    
+    active_project = get_active_project()
+    
+    # Получаем параметры фильтрации из запроса
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    social_network = request.args.get('social_network')
+    
+    # Преобразуем строки дат в объекты datetime, если они указаны
+    start_date = None
+    end_date = None
+    
+    if date_from:
+        try:
+            start_date = datetime.strptime(date_from, '%Y-%m-%d')
+        except ValueError:
+            pass
+    
+    if date_to:
+        try:
+            end_date = datetime.strptime(date_to, '%Y-%m-%d')
+            # Устанавливаем время на конец дня
+            end_date = end_date.replace(hour=23, minute=59, second=59)
+        except ValueError:
+            pass
+    
+    # Базовый запрос для получения упоминаний
+    query = Mention.query.filter_by(project_id=active_project.id)
+    
+    # Применяем фильтры
+    if start_date:
+        query = query.filter(Mention.post_date >= start_date)
+    
+    if end_date:
+        query = query.filter(Mention.post_date <= end_date)
+    
+    if social_network:
+        query = query.filter(Mention.social_network == social_network)
+    
+    # Получаем все упоминания с применёнными фильтрами и сортируем по дате (новые - вверху)
+    mentions = query.order_by(Mention.post_date.desc()).all()
+    
+    # Считаем статистику
+    total_mentions = len(mentions)
+    positive_mentions = len([m for m in mentions if m.sentiment == 'positive'])
+    negative_mentions = len([m for m in mentions if m.sentiment == 'negative'])
+    neutral_mentions = total_mentions - positive_mentions - negative_mentions
+    
+    # Статистика по социальным сетям
+    networks_data = {
+        'vk': len([m for m in mentions if m.social_network == 'vk']),
+        'ok': len([m for m in mentions if m.social_network == 'ok']),
+        'telegram': len([m for m in mentions if m.social_network == 'telegram']),
+        'instagram': len([m for m in mentions if m.social_network == 'instagram'])
+    }
+    
+    # Подсвечиваем ключевые слова в контенте
+    keywords = Keyword.query.filter_by(project_id=active_project.id).all()
+    for mention in mentions:
+        mention.content = highlight_text(mention.content, keywords)
+    
+    # Статистика по ключевым словам
+    keywords_stats = {}
+    
+    for keyword in keywords:
+        count = 0
+        for mention in mentions:
+            if keyword.keyword.lower() in mention.content.lower():
+                count += 1
+        keywords_stats[keyword.keyword] = count
+    
+    # Сортируем ключевые слова по количеству упоминаний (в порядке убывания)
+    sorted_keywords = sorted(keywords_stats.items(), key=lambda x: x[1], reverse=True)
+    
+    # Берем только топ-10 ключевых слов
+    top_keywords = sorted_keywords[:10]
+    keywords_labels = [item[0] for item in top_keywords]
+    keywords_values = [item[1] for item in top_keywords]
+    
+    # Формируем HTML отчёт
+    html = render_template('export_pdf.html',
+                          current_date=datetime.now().strftime('%d.%m.%Y %H:%M'),
+                          project=active_project,
+                          date_from=start_date.strftime('%d.%m.%Y') if start_date else None,
+                          date_to=end_date.strftime('%d.%m.%Y') if end_date else None,
+                          total_mentions=total_mentions,
+                          positive_mentions=positive_mentions,
+                          negative_mentions=negative_mentions,
+                          neutral_mentions=neutral_mentions,
+                          networks_data=networks_data,
+                          mentions=mentions,
+                          keywords_labels=keywords_labels,
+                          keywords_values=keywords_values,
+                          zip=zip)
+    
+    # Генерируем PDF из HTML
+    pdf = weasyprint.HTML(string=html).write_pdf()
+    
+    # Создаем BytesIO объект для отправки файла
+    result = io.BytesIO(pdf)
+    result.seek(0)
+    
+    # Формируем имя файла
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f"report_{active_project.name}_{timestamp}.pdf"
+    
+    # Отправляем PDF файл
+    return send_file(
+        result,
+        mimetype='application/pdf',
+        download_name=filename,
+        as_attachment=True
+    )
+
 @app.route('/analytics')
 def analytics():
     active_project = get_active_project()

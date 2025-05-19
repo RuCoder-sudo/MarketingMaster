@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отчет о мониторинге упоминаний</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 10px;
+        }
+        .header h1 {
+            color: #0d6efd;
+            margin-bottom: 5px;
+        }
+        .header p {
+            color: #666;
+            font-size: 14px;
+            margin-top: 0;
+        }
+        .project-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .project-info h2 {
+            margin-top: 0;
+            color: #0d6efd;
+            font-size: 18px;
+        }
+        .summary {
+            margin-bottom: 30px;
+        }
+        .summary h2 {
+            color: #0d6efd;
+            font-size: 18px;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 5px;
+        }
+        .summary-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .stat-box {
+            flex: 1;
+            min-width: 150px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .stat-box .value {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .stat-box.positive {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        .stat-box.neutral {
+            background-color: #fff3cd;
+            color: #664d03;
+        }
+        .stat-box.negative {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+        .mentions {
+            margin-bottom: 30px;
+        }
+        .mentions h2 {
+            color: #0d6efd;
+            font-size: 18px;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 5px;
+        }
+        .mention-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 3px solid #0d6efd;
+        }
+        .mention-item.vk {
+            border-left-color: #4C75A3;
+        }
+        .mention-item.ok {
+            border-left-color: #EE8208;
+        }
+        .mention-item.telegram {
+            border-left-color: #0088cc;
+        }
+        .mention-item.instagram {
+            border-left-color: #e1306c;
+        }
+        .mention-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .mention-network {
+            font-weight: bold;
+            color: #666;
+        }
+        .mention-date {
+            color: #666;
+            font-size: 12px;
+        }
+        .mention-content {
+            margin-bottom: 10px;
+        }
+        .mention-author {
+            font-size: 12px;
+            color: #666;
+        }
+        .mention-sentiment.positive {
+            color: #0f5132;
+        }
+        .mention-sentiment.neutral {
+            color: #664d03;
+        }
+        .mention-sentiment.negative {
+            color: #842029;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+            color: #666;
+            font-size: 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 0 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Отчет о мониторинге упоминаний</h1>
+            <p>Дата формирования: {{ current_date }}</p>
+        </div>
+        
+        <div class="project-info">
+            <h2>Информация о проекте</h2>
+            <p><strong>Название проекта:</strong> {{ project.name }}</p>
+            <p><strong>Создан:</strong> {{ project.created_at.strftime('%d.%m.%Y') }}</p>
+            <p><strong>Период мониторинга:</strong> {{ date_from if date_from else 'Все время' }} - {{ date_to if date_to else 'Все время' }}</p>
+        </div>
+        
+        <div class="summary">
+            <h2>Сводная информация</h2>
+            <div class="summary-stats">
+                <div class="stat-box">
+                    <div>Всего упоминаний</div>
+                    <div class="value">{{ total_mentions }}</div>
+                </div>
+                <div class="stat-box positive">
+                    <div>Позитивных</div>
+                    <div class="value">{{ positive_mentions }}</div>
+                </div>
+                <div class="stat-box neutral">
+                    <div>Нейтральных</div>
+                    <div class="value">{{ neutral_mentions }}</div>
+                </div>
+                <div class="stat-box negative">
+                    <div>Негативных</div>
+                    <div class="value">{{ negative_mentions }}</div>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 20px;">Распределение по соцсетям</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Социальная сеть</th>
+                        <th>Количество упоминаний</th>
+                        <th>Процент</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ВКонтакте</td>
+                        <td>{{ networks_data['vk'] }}</td>
+                        <td>{{ ((networks_data['vk'] / total_mentions) * 100)|round|int if total_mentions > 0 else 0 }}%</td>
+                    </tr>
+                    <tr>
+                        <td>Одноклассники</td>
+                        <td>{{ networks_data['ok'] }}</td>
+                        <td>{{ ((networks_data['ok'] / total_mentions) * 100)|round|int if total_mentions > 0 else 0 }}%</td>
+                    </tr>
+                    <tr>
+                        <td>Telegram</td>
+                        <td>{{ networks_data['telegram'] }}</td>
+                        <td>{{ ((networks_data['telegram'] / total_mentions) * 100)|round|int if total_mentions > 0 else 0 }}%</td>
+                    </tr>
+                    <tr>
+                        <td>Instagram</td>
+                        <td>{{ networks_data['instagram'] }}</td>
+                        <td>{{ ((networks_data['instagram'] / total_mentions) * 100)|round|int if total_mentions > 0 else 0 }}%</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Ключевые слова</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ключевое слово</th>
+                        <th>Количество упоминаний</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for label, value in zip(keywords_labels, keywords_values) %}
+                    <tr>
+                        <td>{{ label }}</td>
+                        <td>{{ value }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="mentions">
+            <h2>Последние упоминания</h2>
+            
+            {% for mention in mentions[:10] %}
+            <div class="mention-item {{ mention.social_network }}">
+                <div class="mention-header">
+                    <div class="mention-network">
+                        {% if mention.social_network == 'vk' %}
+                        ВКонтакте
+                        {% elif mention.social_network == 'ok' %}
+                        Одноклассники
+                        {% elif mention.social_network == 'telegram' %}
+                        Telegram
+                        {% elif mention.social_network == 'instagram' %}
+                        Instagram
+                        {% else %}
+                        {{ mention.social_network }}
+                        {% endif %}
+                    </div>
+                    <div class="mention-date">
+                        {{ mention.post_date.strftime('%d.%m.%Y %H:%M') if mention.post_date else mention.found_date.strftime('%d.%m.%Y %H:%M') }}
+                    </div>
+                </div>
+                <div class="mention-content">
+                    {{ mention.content|safe }}
+                </div>
+                <div class="mention-author">
+                    Автор: {{ mention.author_name if mention.author_name else 'Неизвестно' }}
+                    {% if mention.sentiment %}
+                    <span class="mention-sentiment {{ mention.sentiment }}">
+                        {% if mention.sentiment == 'positive' %}
+                        (Позитивный)
+                        {% elif mention.sentiment == 'negative' %}
+                        (Негативный)
+                        {% else %}
+                        (Нейтральный)
+                        {% endif %}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="footer">
+            <p>© 2025 MarketingMaster. Отчет сгенерирован автоматически.</p>
+        </div>
+    </div>
+</body>
+</html>
