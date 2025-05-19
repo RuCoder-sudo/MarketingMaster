@@ -180,6 +180,47 @@
                                         <p>{{ mention.highlighted_content|safe }}</p>
                                     </div>
                                     
+                                    <!-- Отображение тегов упоминания -->
+                                    <div class="mention-tags mb-3">
+                                        {% if mention.tags.all() %}
+                                            {% for tag in mention.tags %}
+                                                <span class="badge me-1" style="background-color: {{ tag.color }}">
+                                                    {{ tag.name }}
+                                                    <a href="{{ url_for('remove_tag_from_mention', mention_id=mention.id, tag_id=tag.id) }}" 
+                                                       class="text-white ms-1" style="text-decoration: none;">
+                                                        <i class="fas fa-times-circle"></i>
+                                                    </a>
+                                                </span>
+                                            {% endfor %}
+                                        {% endif %}
+                                        
+                                        <!-- Добавление нового тега -->
+                                        <div class="dropdown d-inline-block">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                                    id="dropdownTagButton{{ mention.id }}" data-bs-toggle="dropdown" 
+                                                    aria-expanded="false">
+                                                <i class="fas fa-tag"></i>
+                                            </button>
+                                            <ul class="dropdown-menu" aria-labelledby="dropdownTagButton{{ mention.id }}">
+                                                {% for tag in tags %}
+                                                    {% if tag not in mention.tags %}
+                                                        <li>
+                                                            <a class="dropdown-item" href="{{ url_for('add_tag_to_mention', mention_id=mention.id, tag_id=tag.id) }}">
+                                                                <span class="badge me-1" style="background-color: {{ tag.color }}">{{ tag.name }}</span>
+                                                            </a>
+                                                        </li>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a class="dropdown-item" href="{{ url_for('tags') }}">
+                                                        <i class="fas fa-cog me-1"></i> Управление тегами
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
                                             <i class="fas fa-user me-1"></i>
@@ -198,7 +239,7 @@
                     <!-- Загрузить еще + Пагинация -->
                     <div class="text-center mb-3">
                         {% if mentions.has_next %}
-                            <a id="load-more-btn" class="btn btn-outline-primary" href="{{ url_for('search', page=mentions.next_num, keyword=keyword_filter, social_network=social_network_filter) }}">
+                            <a id="load-more-btn" class="btn btn-outline-primary" href="{{ url_for('search', page=mentions.next_num, keyword=keyword_filter, social_network=social_network_filter, tag_id=request.args.get('tag_id')) }}">
                                 <i class="fas fa-arrow-down me-2"></i> Загрузить еще
                             </a>
                         {% endif %}
@@ -239,7 +280,7 @@
                             
                             {% if mentions.has_next %}
                                 <li class="page-item">
-                                    <a class="page-link" href="{{ url_for('search', page=mentions.next_num, keyword=keyword_filter, social_network=social_network_filter) }}">
+                                    <a class="page-link" href="{{ url_for('search', page=mentions.next_num, keyword=keyword_filter, social_network=social_network_filter, tag_id=request.args.get('tag_id')) }}">
                                         Следующая <i class="fas fa-chevron-right"></i>
                                     </a>
                                 </li>

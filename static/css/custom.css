@@ -417,3 +417,64 @@
 .mention-card.kwork\.ru {
     border-left-color: #f7941d;
 }
+
+/* Стили для тегов */
+.mention-tags {
+    margin-top: -10px;
+    margin-bottom: 15px;
+}
+
+.mention-tags .badge {
+    font-size: 0.8rem;
+    padding: 5px 8px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.mention-tags .badge:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.mention-tags .dropdown {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.mention-tags .dropdown-menu {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+/* Стили для страницы тегов */
+.tag-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.tag-item:hover {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.tag-item .tag-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.tag-color-preview {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: middle;
+}
