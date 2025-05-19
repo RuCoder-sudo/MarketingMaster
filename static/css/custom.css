@@ -206,7 +206,23 @@
 }
 
 [data-bs-theme="light"] .navbar-dark {
-    background-color: #0d6efd !important;
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #dee2e6 !important;
+}
+
+[data-bs-theme="light"] .navbar-dark .nav-link,
+[data-bs-theme="light"] .navbar-dark .navbar-brand {
+    color: #333333 !important;
+}
+
+[data-bs-theme="light"] .navbar-dark .nav-link:hover,
+[data-bs-theme="light"] .navbar-dark .navbar-brand:hover {
+    color: #0d6efd !important;
+}
+
+[data-bs-theme="light"] .navbar-dark .nav-link.active {
+    color: #0d6efd !important;
+    font-weight: bold;
 }
 
 [data-bs-theme="light"] .card-header {
@@ -214,7 +230,16 @@
 }
 
 [data-bs-theme="light"] .lead,
-[data-bs-theme="light"] p:not(.dropdown-item) {
+[data-bs-theme="light"] p:not(.dropdown-item),
+[data-bs-theme="light"] label.form-label,
+[data-bs-theme="light"] .form-control::placeholder,
+[data-bs-theme="light"] .card-title,
+[data-bs-theme="light"] h1, 
+[data-bs-theme="light"] h2, 
+[data-bs-theme="light"] h3, 
+[data-bs-theme="light"] h4, 
+[data-bs-theme="light"] h5, 
+[data-bs-theme="light"] h6 {
     color: #333 !important;
 }
 

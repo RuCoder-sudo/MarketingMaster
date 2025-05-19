@@ -689,6 +689,28 @@ def export_pdf():
         as_attachment=True
     )
 
+@app.route('/competitors', methods=['GET', 'POST'])
+def competitor_analysis():
+    """Анализ конкурентов и сбор ключевых слов"""
+    active_project = get_active_project()
+    
+    # В реальном приложении здесь был бы запрос к базе данных для получения списка конкурентов
+    # Для демонстрации используем пустой список
+    competitors = []
+    
+    if request.method == 'POST':
+        action = request.form.get('action')
+        
+        if action == 'add_competitor':
+            # В реальном приложении здесь был бы код для добавления конкурента в базу данных
+            flash('Конкурент успешно добавлен!', 'success')
+            save_log(f"Добавлен новый конкурент в проект {active_project.name}")
+            return redirect(url_for('competitor_analysis'))
+    
+    return render_template('competitor_analysis.html', 
+                          active_project=active_project,
+                          competitors=competitors)
+
 @app.route('/seo')
 def seo_analysis():
     """SEO-анализ упоминаний для оптимизации поисковых запросов"""

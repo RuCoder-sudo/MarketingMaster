@@ -1,0 +1,548 @@
+{% extends "base.html" %}
+
+{% block title %}Анализ конкурентов - Мониторинг упоминаний в соцсетях{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>
+            <i class="fas fa-users me-2"></i>
+            Анализ конкурентов
+        </h1>
+        <p class="lead">Исследование конкурентов и сбор ключевых слов для маркетинга и SEO</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Добавить конкурента для анализа
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="add-competitor-form" method="post" action="{{ url_for('competitor_analysis') }}">
+                    <input type="hidden" name="action" value="add_competitor">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="competitor_name" class="form-label">Название конкурента</label>
+                            <input type="text" class="form-control" id="competitor_name" name="competitor_name" placeholder="Например: Company Inc." required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="competitor_url" class="form-label">Веб-сайт</label>
+                            <input type="url" class="form-control" id="competitor_url" name="competitor_url" placeholder="https://example.com">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="competitor_type" class="form-label">Тип конкурента</label>
+                            <select class="form-select" id="competitor_type" name="competitor_type">
+                                <option value="direct">Прямой конкурент</option>
+                                <option value="indirect">Косвенный конкурент</option>
+                                <option value="potential">Потенциальный конкурент</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="social_accounts" class="form-label">Аккаунты в социальных сетях (через запятую)</label>
+                            <input type="text" class="form-control" id="social_accounts" name="social_accounts" placeholder="vk.com/company, t.me/company">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Добавить конкурента
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Список конкурентов
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Название</th>
+                                <th>Сайт</th>
+                                <th>Тип</th>
+                                <th>Социальные сети</th>
+                                <th>Ключевые слова</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if competitors %}
+                                {% for competitor in competitors %}
+                                    <tr>
+                                        <td>{{ competitor.name }}</td>
+                                        <td>
+                                            {% if competitor.url %}
+                                                <a href="{{ competitor.url }}" target="_blank">{{ competitor.url }}</a>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if competitor.type == 'direct' %}
+                                                <span class="badge bg-danger">Прямой</span>
+                                            {% elif competitor.type == 'indirect' %}
+                                                <span class="badge bg-warning text-dark">Косвенный</span>
+                                            {% else %}
+                                                <span class="badge bg-info">Потенциальный</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if competitor.social_accounts %}
+                                                {% for account in competitor.social_accounts.split(',') %}
+                                                    <a href="{{ account.strip() }}" class="badge bg-primary me-1" target="_blank">{{ account.strip() }}</a>
+                                                {% endfor %}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ competitor.keywords|length if competitor.keywords else 0 }}</td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-outline-primary" onclick="analyzeCompetitor({{ competitor.id }})">
+                                                    <i class="fas fa-microscope"></i> Анализ
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" onclick="deleteCompetitor({{ competitor.id }})">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center p-4">
+                                        <div class="empty-state">
+                                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                            <p>Вы пока не добавили ни одного конкурента для анализа</p>
+                                            <p class="text-muted">Добавьте конкурентов выше, чтобы начать анализ</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-7">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-tags me-2"></i>
+                    Ключевые слова конкурентов
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="keyword-cloud" class="p-3 text-center" style="height: 300px;">
+                    <div class="empty-state">
+                        <i class="fas fa-comment-dots fa-3x text-muted mb-3"></i>
+                        <p>Выберите конкурента, чтобы увидеть облако ключевых слов</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-end">
+                    <button id="import-keywords-btn" class="btn btn-primary" disabled>
+                        <i class="fas fa-file-import me-2"></i>
+                        Импортировать в мой проект
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    Рекомендации по конкурентам
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex">
+                        <i class="fas fa-check-circle text-success me-3 mt-1"></i>
+                        <div>
+                            <h6 class="mb-1">Соберите ключевые слова</h6>
+                            <p class="mb-0 text-muted small">Анализируйте ключевые слова конкурентов для обогащения вашей SEO-стратегии</p>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex">
+                        <i class="fas fa-check-circle text-success me-3 mt-1"></i>
+                        <div>
+                            <h6 class="mb-1">Отслеживайте упоминания конкурентов</h6>
+                            <p class="mb-0 text-muted small">Добавьте имена конкурентов в ключевые слова для мониторинга</p>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex">
+                        <i class="fas fa-check-circle text-success me-3 mt-1"></i>
+                        <div>
+                            <h6 class="mb-1">Анализируйте частоту публикаций</h6>
+                            <p class="mb-0 text-muted small">Следите за частотой публикаций конкурентов для оптимизации своего контент-плана</p>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex">
+                        <i class="fas fa-check-circle text-success me-3 mt-1"></i>
+                        <div>
+                            <h6 class="mb-1">Сравните тональность упоминаний</h6>
+                            <p class="mb-0 text-muted small">Оцените настроение аудитории к вашему бренду по сравнению с конкурентами</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="competitor-analysis-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-microscope me-2"></i>
+                    Анализ конкурента: <span id="competitor-name"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center p-5" id="analysis-loading">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-3">Сбор данных и анализ конкурента...</p>
+                </div>
+                
+                <div id="analysis-results" class="d-none">
+                    <ul class="nav nav-tabs mb-3" id="competitor-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="keywords-tab" data-bs-toggle="tab" data-bs-target="#keywords" type="button" role="tab">Ключевые слова</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="mentions-tab" data-bs-toggle="tab" data-bs-target="#mentions" type="button" role="tab">Упоминания</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab">Статистика</button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="competitor-tab-content">
+                        <div class="tab-pane fade show active" id="keywords" role="tabpanel" aria-labelledby="keywords-tab">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Ключевое слово</th>
+                                            <th>Частота</th>
+                                            <th>Важность</th>
+                                            <th>Действие</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="keywords-table-body">
+                                        <!-- Данные будут добавлены через JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="mentions" role="tabpanel" aria-labelledby="mentions-tab">
+                            <div id="mentions-list">
+                                <!-- Данные будут добавлены через JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="stats" role="tabpanel" aria-labelledby="stats-tab">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="border-bottom pb-2 mb-3">Активность в социальных сетях</h6>
+                                    <canvas id="social-activity-chart" width="100%" height="200"></canvas>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="border-bottom pb-2 mb-3">Тональность упоминаний</h6>
+                                    <canvas id="sentiment-chart" width="100%" height="200"></canvas>
+                                </div>
+                            </div>
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <h6 class="border-bottom pb-2 mb-3">Сравнение с вашим проектом</h6>
+                                    <table class="table table-bordered">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Метрика</th>
+                                                <th>Ваш проект</th>
+                                                <th>Конкурент</th>
+                                                <th>Рекомендация</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="comparison-table-body">
+                                            <!-- Данные будут добавлены через JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" id="export-analysis-btn">
+                    <i class="fas fa-file-export me-2"></i>
+                    Экспорт отчета
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Показать модальное окно анализа конкурента
+function analyzeCompetitor(competitorId) {
+    // Очистить предыдущие результаты
+    document.getElementById('analysis-loading').classList.remove('d-none');
+    document.getElementById('analysis-results').classList.add('d-none');
+    
+    // Открыть модальное окно
+    var modal = new bootstrap.Modal(document.getElementById('competitor-analysis-modal'));
+    modal.show();
+    
+    // В реальном приложении здесь бы был AJAX-запрос к серверу для получения данных
+    // Для демонстрации, мы просто симулируем загрузку и показываем тестовые данные
+    setTimeout(() => {
+        // Скрыть индикатор загрузки и показать результаты
+        document.getElementById('analysis-loading').classList.add('d-none');
+        document.getElementById('analysis-results').classList.remove('d-none');
+        
+        // Заполнить данными таблицу ключевых слов
+        var keywordsBody = document.getElementById('keywords-table-body');
+        keywordsBody.innerHTML = '';
+        
+        const demoKeywords = [
+            { word: 'маркетинг', frequency: 35, importance: 'Высокая' },
+            { word: 'аналитика', frequency: 28, importance: 'Средняя' },
+            { word: 'продвижение', frequency: 24, importance: 'Высокая' },
+            { word: 'социальные сети', frequency: 22, importance: 'Высокая' },
+            { word: 'стратегия', frequency: 19, importance: 'Средняя' },
+            { word: 'content', frequency: 17, importance: 'Низкая' },
+            { word: 'бренд', frequency: 16, importance: 'Средняя' },
+            { word: 'клиенты', frequency: 14, importance: 'Средняя' },
+            { word: 'SEO', frequency: 12, importance: 'Высокая' },
+            { word: 'продажи', frequency: 10, importance: 'Низкая' }
+        ];
+        
+        demoKeywords.forEach(keyword => {
+            var row = document.createElement('tr');
+            
+            var wordCell = document.createElement('td');
+            wordCell.textContent = keyword.word;
+            
+            var frequencyCell = document.createElement('td');
+            frequencyCell.textContent = keyword.frequency;
+            
+            var importanceCell = document.createElement('td');
+            var importanceBadge = document.createElement('span');
+            importanceBadge.className = 'badge';
+            
+            if (keyword.importance === 'Высокая') {
+                importanceBadge.classList.add('bg-success');
+            } else if (keyword.importance === 'Средняя') {
+                importanceBadge.classList.add('bg-warning', 'text-dark');
+            } else {
+                importanceBadge.classList.add('bg-secondary');
+            }
+            
+            importanceBadge.textContent = keyword.importance;
+            importanceCell.appendChild(importanceBadge);
+            
+            var actionCell = document.createElement('td');
+            var addButton = document.createElement('button');
+            addButton.className = 'btn btn-sm btn-outline-primary';
+            addButton.innerHTML = '<i class="fas fa-plus-circle me-1"></i> Добавить';
+            actionCell.appendChild(addButton);
+            
+            row.appendChild(wordCell);
+            row.appendChild(frequencyCell);
+            row.appendChild(importanceCell);
+            row.appendChild(actionCell);
+            
+            keywordsBody.appendChild(row);
+        });
+        
+        // Заполнить раздел упоминаний
+        var mentionsList = document.getElementById('mentions-list');
+        mentionsList.innerHTML = '';
+        
+        const demoMentions = [
+            { text: 'Компания ABC предлагает отличные решения для маркетинга в социальных сетях', source: 'vk.com', date: '2 дня назад', sentiment: 'positive' },
+            { text: 'Новая стратегия продвижения от ABC оказалась очень эффективной для нашего бизнеса', source: 'facebook.com', date: '1 неделю назад', sentiment: 'positive' },
+            { text: 'Не совсем понимаю, почему все так хвалят аналитику от ABC. По-моему, ничего особенного', source: 'telegram', date: '3 дня назад', sentiment: 'neutral' },
+            { text: 'ABC запустили новый инструмент для SEO-оптимизации. Надо попробовать', source: 'twitter.com', date: '5 дней назад', sentiment: 'neutral' },
+            { text: 'Разочарован обслуживанием в ABC. Второй раз задерживают отчеты', source: 'instagram.com', date: '1 день назад', sentiment: 'negative' }
+        ];
+        
+        demoMentions.forEach(mention => {
+            var card = document.createElement('div');
+            card.className = 'card mb-3';
+            
+            var headerClass = 'bg-light';
+            if (mention.sentiment === 'positive') {
+                card.style.borderLeft = '3px solid #28a745';
+            } else if (mention.sentiment === 'negative') {
+                card.style.borderLeft = '3px solid #dc3545';
+            } else {
+                card.style.borderLeft = '3px solid #6c757d';
+            }
+            
+            var cardBody = `
+                <div class="card-body">
+                    <p class="card-text">${mention.text}</p>
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">Источник: ${mention.source}</small>
+                        <small class="text-muted">${mention.date}</small>
+                    </div>
+                </div>
+            `;
+            
+            card.innerHTML = cardBody;
+            mentionsList.appendChild(card);
+        });
+        
+        // Инициализация графика активности в соцсетях
+        var socialActivityChart = new Chart(
+            document.getElementById('social-activity-chart'),
+            {
+                type: 'bar',
+                data: {
+                    labels: ['ВКонтакте', 'Facebook', 'Instagram', 'Twitter', 'Telegram'],
+                    datasets: [{
+                        label: 'Количество постов',
+                        data: [25, 18, 32, 12, 20],
+                        backgroundColor: [
+                            'rgba(76, 117, 163, 0.7)',
+                            'rgba(59, 89, 152, 0.7)',
+                            'rgba(225, 48, 108, 0.7)',
+                            'rgba(29, 161, 242, 0.7)',
+                            'rgba(0, 136, 204, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(76, 117, 163)',
+                            'rgb(59, 89, 152)',
+                            'rgb(225, 48, 108)',
+                            'rgb(29, 161, 242)',
+                            'rgb(0, 136, 204)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            }
+        );
+        
+        // Инициализация графика тональности
+        var sentimentChart = new Chart(
+            document.getElementById('sentiment-chart'),
+            {
+                type: 'doughnut',
+                data: {
+                    labels: ['Позитивная', 'Нейтральная', 'Негативная'],
+                    datasets: [{
+                        data: [65, 25, 10],
+                        backgroundColor: [
+                            'rgba(40, 167, 69, 0.7)',
+                            'rgba(108, 117, 125, 0.7)',
+                            'rgba(220, 53, 69, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(40, 167, 69)',
+                            'rgb(108, 117, 125)',
+                            'rgb(220, 53, 69)'
+                        ],
+                        borderWidth: 1
+                    }]
+                }
+            }
+        );
+        
+        // Заполнить таблицу сравнения
+        var comparisonBody = document.getElementById('comparison-table-body');
+        comparisonBody.innerHTML = '';
+        
+        const comparisonData = [
+            { metric: 'Количество упоминаний', your: '156', competitor: '180', recommendation: 'Увеличить информационные поводы' },
+            { metric: 'Охват аудитории', your: '15,500', competitor: '22,300', recommendation: 'Расширить каналы коммуникации' },
+            { metric: 'Позитивные отзывы', your: '75%', competitor: '68%', recommendation: 'Поддерживать качество сервиса' },
+            { metric: 'Активность в соцсетях', your: '3 поста в неделю', competitor: '5 постов в неделю', recommendation: 'Увеличить частоту публикаций' },
+            { metric: 'Ключевые слова', your: '8 основных', competitor: '14 основных', recommendation: 'Расширить семантическое ядро' }
+        ];
+        
+        comparisonData.forEach(item => {
+            var row = document.createElement('tr');
+            
+            var metricCell = document.createElement('td');
+            metricCell.textContent = item.metric;
+            
+            var yourCell = document.createElement('td');
+            yourCell.textContent = item.your;
+            
+            var competitorCell = document.createElement('td');
+            competitorCell.textContent = item.competitor;
+            
+            var recommendationCell = document.createElement('td');
+            recommendationCell.textContent = item.recommendation;
+            
+            row.appendChild(metricCell);
+            row.appendChild(yourCell);
+            row.appendChild(competitorCell);
+            row.appendChild(recommendationCell);
+            
+            comparisonBody.appendChild(row);
+        });
+        
+        document.getElementById('competitor-name').textContent = 'Company ABC';
+    }, 1500);
+}
+
+// Функция удаления конкурента
+function deleteCompetitor(competitorId) {
+    if (confirm('Вы уверены, что хотите удалить этого конкурента?')) {
+        // В реальном приложении здесь был бы AJAX-запрос к серверу
+        alert('Конкурент успешно удален');
+    }
+}
+
+// Инициализация облака ключевых слов
+document.addEventListener('DOMContentLoaded', function() {
+    // В реальном приложении здесь был бы код для инициализации облака слов
+    // Например, с использованием библиотеки jQCloud или другой
+    document.getElementById('keyword-cloud').innerHTML = '<div class="text-center p-5 text-muted"><i class="fas fa-tags fa-4x mb-3"></i><p>Выберите конкурента для просмотра облака ключевых слов</p></div>';
+});
+</script>
+{% endblock %}

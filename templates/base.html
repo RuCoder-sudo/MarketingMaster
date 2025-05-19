@@ -37,11 +37,6 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == url_for('settings') %}active{% endif %}" href="{{ url_for('settings') }}">
-                            <i class="fas fa-cog me-1 text-info"></i> Настройки
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link {% if request.path == url_for('search') %}active{% endif %}" href="{{ url_for('search') }}">
                             <i class="fas fa-search me-1 text-success"></i> Поиск
                         </a>
@@ -59,6 +54,11 @@
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == url_for('extra') %}active{% endif %}" href="{{ url_for('extra') }}">
                             <i class="fas fa-tools me-1 text-secondary"></i> Дополнительно
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('settings') %}active{% endif %}" href="{{ url_for('settings') }}">
+                            <i class="fas fa-cog me-1 text-info"></i> Настройки
                         </a>
                     </li>
                 </ul>
