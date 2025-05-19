@@ -26,6 +26,9 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
         <div class="container">
+            <a class="navbar-brand d-lg-none" href="{{ url_for('index') }}">
+                <i class="fas fa-comments"></i> MМастер
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -82,22 +85,71 @@
                         <li>
                             <h6 class="dropdown-header">Статус подключений</h6>
                         </li>
-                        <li>
-                            <div class="dropdown-item">
-                                <div class="d-flex align-items-center">
-                                    <span class="status-indicator bg-success rounded-circle me-2" style="width: 10px; height: 10px;"></span>
-                                    <span>ВКонтакте API</span>
+                        {% if active_project and active_project.settings %}
+                            {% if active_project.settings[0].vk_token %}
+                            <li>
+                                <div class="dropdown-item">
+                                    <div class="d-flex align-items-center">
+                                        <span class="status-indicator bg-success rounded-circle me-2" style="width: 10px; height: 10px;"></span>
+                                        <span>ВКонтакте API</span>
+                                    </div>
                                 </div>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="dropdown-item">
-                                <div class="d-flex align-items-center">
-                                    <span class="status-indicator bg-danger rounded-circle me-2" style="width: 10px; height: 10px;"></span>
-                                    <span>Telegram API</span>
+                            </li>
+                            {% endif %}
+                            
+                            {% if active_project.settings[0].ok_token %}
+                            <li>
+                                <div class="dropdown-item">
+                                    <div class="d-flex align-items-center">
+                                        <span class="status-indicator bg-success rounded-circle me-2" style="width: 10px; height: 10px;"></span>
+                                        <span>Одноклассники API</span>
+                                    </div>
                                 </div>
-                            </div>
-                        </li>
+                            </li>
+                            {% endif %}
+                            
+                            {% if active_project.settings[0].telegram_token %}
+                            <li>
+                                <div class="dropdown-item">
+                                    <div class="d-flex align-items-center">
+                                        <span class="status-indicator bg-success rounded-circle me-2" style="width: 10px; height: 10px;"></span>
+                                        <span>Telegram API</span>
+                                    </div>
+                                </div>
+                            </li>
+                            {% endif %}
+                            
+                            {% if active_project.settings[0].instagram_token %}
+                            <li>
+                                <div class="dropdown-item">
+                                    <div class="d-flex align-items-center">
+                                        <span class="status-indicator bg-success rounded-circle me-2" style="width: 10px; height: 10px;"></span>
+                                        <span>Instagram API</span>
+                                    </div>
+                                </div>
+                            </li>
+                            {% endif %}
+                            
+                            {% if not active_project.settings[0].vk_token and not active_project.settings[0].ok_token and not active_project.settings[0].telegram_token and not active_project.settings[0].instagram_token %}
+                            <li>
+                                <div class="dropdown-item">
+                                    <div class="d-flex align-items-center">
+                                        <span class="status-indicator bg-secondary rounded-circle me-2" style="width: 10px; height: 10px;"></span>
+                                        <span>Нет подключенных API</span>
+                                    </div>
+                                </div>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                            <li>
+                                <div class="dropdown-item">
+                                    <div class="d-flex align-items-center">
+                                        <span class="status-indicator bg-secondary rounded-circle me-2" style="width: 10px; height: 10px;"></span>
+                                        <span>Нет активного проекта</span>
+                                    </div>
+                                </div>
+                            </li>
+                        {% endif %}
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <h6 class="dropdown-header">Уведомления</h6>

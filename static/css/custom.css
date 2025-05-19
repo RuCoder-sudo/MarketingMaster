@@ -1,5 +1,47 @@
 /* Custom styles for Social Media Monitoring application */
 
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+    /* Шапка на мобильных устройствах */
+    .navbar {
+        padding: 0.5rem 1rem;
+    }
+    
+    /* Улучшенное отображение выпадающих меню на мобильных */
+    .dropdown-menu {
+        width: 100%;
+        border-radius: 0;
+        margin-top: 0;
+        box-shadow: none;
+    }
+    
+    /* Исправление отступов в подвале */
+    footer {
+        text-align: center;
+    }
+    
+    footer .text-md-end {
+        text-align: center !important;
+        margin-top: 1.5rem;
+    }
+    
+    /* Улучшение отображения карточек на мобильных */
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    /* Улучшение отображения контента в упоминаниях */
+    .mention-content {
+        font-size: 0.95rem;
+    }
+    
+    /* Улучшение отступов для основного контента */
+    .container.py-3 {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+}
+
 /* Highlight colors for found mentions */
 .highlight-yellow {
     background-color: #ffff00;
